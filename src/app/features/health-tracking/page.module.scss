@@ -1,7 +1,9 @@
+@import '../../styles/variables.scss';
+
 .featureContainer {
+  padding: 2rem;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 2rem 1rem;
 }
 
 .featureHeader {
@@ -13,224 +15,193 @@
   font-size: 2.5rem;
   font-weight: 700;
   margin-bottom: 1rem;
-  color: var(--primary-color);
+  color: #000000;
+  text-shadow: none;
 }
 
 .subtitle {
   font-size: 1.2rem;
-  color: var(--dark-gray);
-  max-width: 700px;
-  margin: 0 auto;
-}
-
-.featureContent {
-  display: flex;
-  flex-direction: column;
-  gap: 3rem;
-}
-
-.featureDescription {
+  color: #333333;
   max-width: 800px;
   margin: 0 auto;
+}
+
+.featureSection {
+  margin-bottom: 4rem;
 }
 
 .sectionTitle {
   font-size: 1.8rem;
   font-weight: 600;
   margin-bottom: 1.5rem;
-  color: var(--primary-color);
+  color: #000000;
+  text-shadow: none;
+}
+
+.sectionContent {
+  margin-bottom: 2rem;
 }
 
 .paragraph {
-  font-size: 1.1rem;
-  line-height: 1.7;
-  color: var(--dark-gray);
   margin-bottom: 1.5rem;
-}
-
-.metricsSection {
-  margin: 0 auto;
-  max-width: 1000px;
-}
-
-.metricsGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 1.5rem;
-}
-
-.metricCard {
-  background-color: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  padding: 1.5rem;
-  transition: transform 0.3s ease;
-  
-  &:hover {
-    transform: translateY(-5px);
-  }
-}
-
-.metricIcon {
-  font-size: 2.5rem;
-  margin-bottom: 1rem;
-}
-
-.metricName {
-  font-size: 1.3rem;
-  font-weight: 600;
-  margin-bottom: 0.75rem;
-  color: #1f2937;
-}
-
-.metricDescription {
-  color: var(--dark-gray);
   line-height: 1.6;
+  color: #333333;
+  font-size: 1.1rem;
 }
 
-.benefitsSection {
-  background-color: #f8fafc;
-  border-radius: 12px;
-  padding: 2.5rem;
-}
-
-.benefitsList {
-  list-style: none;
-  padding: 0;
+.trackingGrid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 1.5rem;
-}
-
-.benefitItem {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.75rem;
-  font-size: 1.1rem;
-  line-height: 1.5;
-}
-
-.checkmark {
-  color: #10B981;
-  font-weight: bold;
-  font-size: 1.2rem;
-}
-
-.dataSecuritySection {
-  background-color: #f8fafc;
-  border-radius: 12px;
-  padding: 2.5rem;
-}
-
-.securityContent {
-  display: flex;
-  align-items: flex-start;
   gap: 2rem;
 }
 
-.securityIcon {
-  font-size: 3rem;
-  color: var(--primary-color);
+.trackingCard {
+  background-color: $bg-white;
+  border-radius: $border-radius-lg;
+  padding: 2rem;
+  box-shadow: $shadow-md;
+  transition: transform 0.3s, box-shadow 0.3s;
+  
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: $shadow-lg;
+  }
+}
+
+.trackingIconWrapper {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  background-color: rgba($primary-color, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+
+.trackingIcon {
+  font-size: 2rem;
+  color: $primary-color;
+}
+
+.trackingTitle {
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: #000000;
+  text-shadow: none;
+}
+
+.trackingDescription {
+  color: #333333;
+  line-height: 1.5;
+}
+
+.benefitsList {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 2rem;
+}
+
+.benefitItem {
+  background-color: $bg-white;
+  border-radius: $border-radius-md;
+  padding: 1.5rem;
+  box-shadow: $shadow-sm;
+}
+
+.benefitTitle {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  color: #000000;
+  text-shadow: none;
+}
+
+.benefitDescription {
+  color: #333333;
+  line-height: 1.5;
+}
+
+.stepsList {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.stepItem {
+  display: flex;
+  gap: 1.5rem;
+  align-items: flex-start;
+}
+
+.stepNumber {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: $primary-color;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1.2rem;
   flex-shrink: 0;
 }
 
-.securityText {
+.stepContent {
   flex: 1;
 }
 
-.securityList {
-  padding-left: 1.5rem;
-  
-  li {
-    margin-bottom: 0.75rem;
-    color: var(--dark-gray);
-    font-size: 1.1rem;
-  }
+.stepTitle {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #000000;
+  text-shadow: none;
 }
 
-.ctaSection {
-  background: linear-gradient(135deg, var(--primary-color), #4a8eda);
-  border-radius: 12px;
-  padding: 3rem 2rem;
+.stepDescription {
+  color: #333333;
+  line-height: 1.5;
+}
+
+.ctaContainer {
   text-align: center;
+  margin-top: 3rem;
+}
+
+.ctaButton {
+  display: inline-block;
+  background-color: $primary-color;
   color: white;
-  margin-top: 2rem;
-}
-
-.ctaTitle {
-  font-size: 1.8rem;
-  font-weight: 700;
-  margin-bottom: 2rem;
-  max-width: 700px;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.ctaButtons {
-  display: flex;
-  justify-content: center;
-  gap: 1rem;
-  flex-wrap: wrap;
-}
-
-.primaryButton {
-  background-color: white;
-  color: var(--primary-color);
-  border: none;
-  border-radius: 8px;
-  padding: 0.75rem 1.5rem;
-  font-size: 1rem;
+  padding: 1rem 2rem;
+  border-radius: $border-radius-md;
   font-weight: 600;
-  text-decoration: none;
-  transition: all 0.2s ease;
+  font-size: 1.1rem;
+  transition: background-color 0.3s;
   
   &:hover {
-    background-color: rgba(255, 255, 255, 0.9);
-    transform: translateY(-2px);
+    background-color: darken($primary-color, 10%);
   }
 }
 
-.secondaryButton {
-  background-color: transparent;
-  color: white;
-  border: 2px solid white;
-  border-radius: 8px;
-  padding: 0.75rem 1.5rem;
-  font-size: 1rem;
-  font-weight: 600;
-  text-decoration: none;
-  transition: all 0.2s ease;
-  
-  &:hover {
-    background-color: rgba(255, 255, 255, 0.1);
-    transform: translateY(-2px);
+@media (max-width: $breakpoint-md) {
+  .featureContainer {
+    padding: 1.5rem;
   }
-}
-
-@media (max-width: 768px) {
+  
   .title {
     font-size: 2rem;
   }
   
-  .sectionTitle {
-    font-size: 1.5rem;
-  }
-  
-  .benefitsList {
+  .trackingGrid, .benefitsList {
     grid-template-columns: 1fr;
   }
   
-  .metricsGrid {
-    grid-template-columns: 1fr;
-  }
-  
-  .securityContent {
+  .stepItem {
     flex-direction: column;
-    align-items: center;
-    text-align: center;
-  }
-  
-  .ctaTitle {
-    font-size: 1.5rem;
+    align-items: flex-start;
+    gap: 1rem;
   }
 } 

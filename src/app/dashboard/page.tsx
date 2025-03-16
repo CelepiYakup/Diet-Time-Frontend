@@ -6,7 +6,7 @@ import Link from 'next/link';
 import styles from './page.module.scss';
 import { useAuth } from '../context/AuthContext';
 import { mealApi, Meal } from '../services/api';
-import { FaUtensils, FaCalendarAlt } from 'react-icons/fa';
+import { FaUtensils, FaCalendarAlt, FaHeartbeat } from 'react-icons/fa';
 
 export default function Dashboard() {
   const router = useRouter();
@@ -137,6 +137,14 @@ export default function Dashboard() {
             </div>
             <h3 className={styles.featureTitle}>Meal Planning</h3>
             <p className={styles.featureDescription}>Plan your meals for the week and generate shopping lists</p>
+          </Link>
+
+          <Link href="/dashboard/health-tracking" className={styles.featureCard}>
+            <div className={styles.featureIconWrapper}>
+              <FaHeartbeat className={styles.featureIcon} />
+            </div>
+            <h3 className={styles.featureTitle}>Health Tracking</h3>
+            <p className={styles.featureDescription}>Monitor your health metrics and track your progress over time.</p>
           </Link>
         </div>
       </section>

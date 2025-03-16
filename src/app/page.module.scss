@@ -19,7 +19,7 @@
 
 .subtitle {
   font-size: 1.25rem;
-  color: var(--dark-gray);
+  color: #000000;
   max-width: 700px;
   margin: 0 auto 2rem;
   line-height: 1.6;
@@ -33,7 +33,7 @@
 }
 
 .primaryButton {
-  background-color: var(--primary-color);
+  background-color: #4a8eda;
   color: white;
   border: none;
   border-radius: 8px;
@@ -75,7 +75,7 @@
   font-weight: 700;
   text-align: center;
   margin-bottom: 2.5rem;
-  color: var(--primary-color);
+  color: #000000;
 }
 
 .featuresGrid {
@@ -107,11 +107,11 @@
   font-size: 1.3rem;
   font-weight: 600;
   margin-bottom: 1rem;
-  color: var(--primary-color);
+  color: #000000;
 }
 
 .featureDescription {
-  color: var(--dark-gray);
+  color: #000000;
   margin-bottom: 1.5rem;
   line-height: 1.6;
 }
@@ -181,7 +181,7 @@
 .testimonialText {
   font-size: 1.25rem;
   line-height: 1.7;
-  color: var(--dark-gray);
+  color: #000000;
   margin-bottom: 2rem;
   font-style: italic;
   position: relative;
@@ -247,7 +247,7 @@
 .ctaButton {
   display: inline-block;
   background-color: white;
-  color: var(--primary-color);
+  color: #282c3c;
   border: none;
   border-radius: 8px;
   padding: 0.75rem 1.5rem;

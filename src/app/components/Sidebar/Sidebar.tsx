@@ -28,10 +28,16 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
   const pathname = usePathname();
   const sidebarRef = useRef<HTMLDivElement>(null);
 
+  // Debug logs
+  useEffect(() => {
+    console.log('Sidebar props changed - isOpen:', isOpen);
+  }, [isOpen]);
+
   // Close sidebar when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (isOpen && sidebarRef.current && !sidebarRef.current.contains(event.target as Node)) {
+        console.log('Clicked outside sidebar, closing...');
         onClose();
       }
     };
@@ -42,19 +48,14 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
     };
   }, [isOpen, onClose]);
 
-  // Close sidebar when route changes
-  useEffect(() => {
-    if (isOpen) {
-      onClose();
-    }
-  }, [pathname, isOpen, onClose]);
-
   // Prevent scrolling when sidebar is open
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
+      console.log('Setting body overflow to hidden');
     } else {
       document.body.style.overflow = 'auto';
+      console.log('Setting body overflow to auto');
     }
     
     return () => {
@@ -79,8 +80,18 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
 
   return (
     <>
-      <div className={`${styles.sidebarOverlay} ${isOpen ? styles.active : ''}`} onClick={onClose}></div>
-      <aside className={`${styles.sidebar} ${isOpen ? styles.open : ''}`} ref={sidebarRef}>
+      <div 
+        className={`${styles.sidebarOverlay} ${isOpen ? styles.active : ''}`} 
+        onClick={() => {
+          console.log('Overlay clicked, closing sidebar...');
+          onClose();
+        }}
+      ></div>
+      <aside 
+        className={`${styles.sidebar} ${isOpen ? styles.open : ''}`} 
+        ref={sidebarRef}
+        style={{ zIndex: 9999 }} // Force a high z-index
+      >
         <div className={styles.sidebarHeader}>
           <div className={styles.sidebarLogo}>Diet Time</div>
           <button className={styles.closeButton} onClick={onClose}>

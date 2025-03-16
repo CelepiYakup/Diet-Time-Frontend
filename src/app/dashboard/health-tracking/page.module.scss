@@ -1,0 +1,367 @@
+@import '../../styles/variables.scss';
+
+.pageContainer {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.healthTrackingContainer {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.dashboardHeader {
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.dashboardTitle {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+
+.dashboardDescription {
+  font-size: 1.1rem;
+  color: #333333;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.dashboardOverview {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
+}
+
+.overviewCard {
+  background-color: $bg-white;
+  border-radius: $border-radius-md;
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  box-shadow: $shadow-sm;
+  transition: transform 0.2s;
+  
+  &:hover {
+    transform: translateY(-5px);
+  }
+}
+
+.overviewIcon {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background-color: rgba($primary-color, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 1rem;
+  font-size: 1.5rem;
+  color: $primary-color;
+}
+
+.overviewData {
+  display: flex;
+  flex-direction: column;
+}
+
+.overviewLabel {
+  font-size: 0.9rem;
+  color: #555555;
+  margin-bottom: 0.25rem;
+}
+
+.overviewValue {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #000000;
+}
+
+.tabsContainer {
+  background-color: $bg-white;
+  border-radius: $border-radius-lg;
+  box-shadow: $shadow-md;
+  overflow: hidden;
+}
+
+.tabs {
+  display: flex;
+  border-bottom: 1px solid #e0e0e0;
+  background-color: #f5f5f5;
+}
+
+.tabButton {
+  padding: 1rem 1.5rem;
+  background: none;
+  border: none;
+  font-weight: 600;
+  color: #555555;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.2s;
+  
+  &:hover {
+    background-color: #e9e9e9;
+    color: #000000;
+  }
+  
+  &.active {
+    background-color: $bg-white;
+    color: $primary-color;
+    border-bottom: 3px solid $primary-color;
+  }
+}
+
+.tabIcon {
+  font-size: 1.2rem;
+}
+
+.tabContent {
+  padding: 2rem;
+}
+
+.metricsHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.metricsTitle {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #000000;
+  text-shadow: none;
+}
+
+.addButton {
+  background-color: $primary-color;
+  color: white;
+  border: none;
+  border-radius: $border-radius-md;
+  padding: 0.75rem 1.25rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: background-color 0.2s;
+  
+  &:hover {
+    background-color: darken($primary-color, 10%);
+  }
+}
+
+.metricsTable {
+  margin-bottom: 2rem;
+  overflow-x: auto;
+  
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    
+    th, td {
+      padding: 1rem;
+      text-align: left;
+      border-bottom: 1px solid #e0e0e0;
+    }
+    
+    th {
+      font-weight: 600;
+      color: #000000;
+      background-color: #f5f5f5;
+    }
+    
+    td {
+      color: #333333;
+    }
+    
+    tr:hover td {
+      background-color: #f9f9f9;
+    }
+  }
+}
+
+.chartContainer {
+  margin-top: 2rem;
+  background-color: var(--card-bg);
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.chartsRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  margin-top: 2rem;
+  
+  .chartContainer {
+    flex: 1;
+    min-width: 300px;
+    margin-top: 0;
+  }
+}
+
+.chartTitle {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: var(--text-primary);
+}
+
+.chartPlaceholder {
+  height: 300px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #777777;
+  
+  .chartIcon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    color: #aaaaaa;
+  }
+}
+
+.formOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s, visibility 0.3s;
+  
+  &.active {
+    opacity: 1;
+    visibility: visible;
+  }
+}
+
+.formContainer {
+  background-color: $bg-white;
+  border-radius: $border-radius-md;
+  padding: 2rem;
+  width: 100%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: $shadow-lg;
+}
+
+.formTitle {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  color: #000000;
+  text-shadow: none;
+}
+
+.formGroup {
+  margin-bottom: 1.5rem;
+  
+  label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: #333333;
+  }
+  
+  input, select {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #cccccc;
+    border-radius: $border-radius-sm;
+    font-size: 1rem;
+    background-color: white;
+    color: #333333;
+    
+    &:focus {
+      outline: none;
+      border-color: $primary-color;
+      box-shadow: 0 0 0 2px rgba($primary-color, 0.2);
+    }
+  }
+}
+
+.formActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.cancelButton {
+  background-color: #f0f0f0;
+  color: #333333;
+  border: none;
+  border-radius: $border-radius-md;
+  padding: 0.75rem 1.5rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  
+  &:hover {
+    background-color: #e0e0e0;
+  }
+}
+
+.submitButton {
+  background-color: $primary-color;
+  color: white;
+  border: none;
+  border-radius: $border-radius-md;
+  padding: 0.75rem 1.5rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  
+  &:hover {
+    background-color: darken($primary-color, 10%);
+  }
+}
+
+@media (max-width: $breakpoint-md) {
+  .healthTrackingContainer {
+    padding: 1rem;
+  }
+  
+  .tabs {
+    flex-wrap: wrap;
+  }
+  
+  .tabButton {
+    flex: 1 0 50%;
+    padding: 0.75rem;
+    font-size: 0.9rem;
+  }
+  
+  .tabContent {
+    padding: 1rem;
+  }
+  
+  .metricsTable {
+    table {
+      th, td {
+        padding: 0.75rem 0.5rem;
+        font-size: 0.9rem;
+      }
+    }
+  }
+} 
