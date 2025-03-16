@@ -1,0 +1,51 @@
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 0;
+  margin-bottom: 2rem;
+  border-bottom: 1px solid var(--light-gray);
+}
+
+.logo {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--primary-color);
+}
+
+.nav {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+}
+
+.navLink {
+  font-weight: 500;
+  transition: color var(--transition-speed);
+  
+  &:hover {
+    color: var(--primary-color);
+  }
+}
+
+.userMenu {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-left: 1rem;
+}
+
+.username {
+  font-weight: 500;
+  color: var(--dark-gray);
+}
+
+.logoutButton {
+  color: var(--danger-color);
+  font-weight: 500;
+  transition: opacity var(--transition-speed);
+  
+  &:hover {
+    opacity: 0.8;
+  }
+} 

@@ -1,0 +1,255 @@
+@import '../styles/variables.scss';
+
+.dashboardContainer {
+  padding: 1rem 0;
+}
+
+.welcomeSection {
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.welcomeTitle {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  color: $text-white;
+}
+
+.welcomeSubtitle {
+  font-size: 1.1rem;
+  color: $text-light;
+}
+
+.statsSection {
+  margin-bottom: 2rem;
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.statCard {
+  background-color: $bg-light;
+  border-radius: 8px;
+  padding: 1.5rem;
+  text-align: center;
+  box-shadow: $shadow-sm;
+  transition: transform 0.2s, box-shadow 0.2s;
+  
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: $shadow-md;
+  }
+}
+
+.statTitle {
+  font-size: 0.9rem;
+  color: $text-light;
+  margin-bottom: 0.5rem;
+}
+
+.statValue {
+  font-size: 2rem;
+  font-weight: 700;
+  color: $primary-color;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.sectionTitle {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: $text-white;
+}
+
+.addButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.recentMealsSection {
+  margin-bottom: 2rem;
+}
+
+.mealsList {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1rem;
+}
+
+.mealCard {
+  background-color: $bg-light;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: $shadow-sm;
+  transition: transform 0.2s;
+  
+  &:hover {
+    transform: translateY(-3px);
+  }
+}
+
+.mealHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background-color: rgba($primary-color, 0.1);
+}
+
+.mealName {
+  font-weight: 600;
+  color: $text-primary;
+}
+
+.mealTime {
+  font-size: 0.85rem;
+  color: $text-secondary;
+}
+
+.mealDetails {
+  padding: 1rem;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+}
+
+.mealDetail {
+  display: flex;
+  flex-direction: column;
+}
+
+.mealDetailLabel {
+  font-size: 0.8rem;
+  color: $text-light;
+  margin-bottom: 0.25rem;
+}
+
+.mealDetailValue {
+  font-weight: 600;
+  color: $text-primary;
+}
+
+.mealActions {
+  display: flex;
+  border-top: 1px solid $border-color;
+}
+
+.editButton, .deleteButton {
+  flex: 1;
+  padding: 0.75rem;
+  text-align: center;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.editButton {
+  color: $primary-color;
+  border-right: 1px solid $border-color;
+  
+  &:hover {
+    background-color: rgba($primary-color, 0.1);
+  }
+}
+
+.deleteButton {
+  color: $danger-color;
+  
+  &:hover {
+    background-color: rgba($danger-color, 0.1);
+  }
+}
+
+.loadingState, .errorState, .emptyState {
+  padding: 2rem;
+  text-align: center;
+  background-color: $bg-light;
+  border-radius: 8px;
+}
+
+.loadingState {
+  color: $text-secondary;
+}
+
+.errorState {
+  color: $danger-color;
+}
+
+.emptyState {
+  color: $text-secondary;
+  
+  p {
+    margin-bottom: 1rem;
+  }
+}
+
+// Features section
+.featuresSection {
+  margin-bottom: 2rem;
+}
+
+.featuresGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.featureCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1.5rem;
+  background-color: $bg-light;
+  border-radius: 8px;
+  box-shadow: $shadow-sm;
+  transition: transform 0.2s, box-shadow 0.2s;
+  text-decoration: none;
+  color: inherit;
+  
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: $shadow-md;
+  }
+}
+
+.featureIconWrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 60px;
+  height: 60px;
+  background-color: rgba($primary-color, 0.15);
+  border-radius: 50%;
+  margin-bottom: 1rem;
+}
+
+.featureIcon {
+  font-size: 1.5rem;
+  color: $primary-color;
+}
+
+.featureTitle {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  text-align: center;
+  color: $text-white;
+}
+
+.featureDescription {
+  font-size: 0.9rem;
+  color: $text-light;
+  text-align: center;
+  margin: 0;
+} 

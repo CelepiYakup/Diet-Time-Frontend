@@ -1,0 +1,269 @@
+@import '../../styles/variables.scss';
+
+.navbar {
+  position: sticky;
+  top: 0;
+  width: 100%;
+  background-color: $bg-darker;
+  z-index: 1000;
+  transition: box-shadow 0.3s ease, background-color 0.3s ease;
+  
+  &.scrolled {
+    box-shadow: $shadow-md;
+    background-color: rgba($bg-darker, 0.98);
+  }
+}
+
+.navbarContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1.5rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.navbarLeft {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.sidebarToggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: $text-primary;
+  font-size: 1.25rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: $border-radius-md;
+  transition: background-color 0.2s;
+  
+  &:hover {
+    background-color: rgba($primary-color, 0.2);
+    color: $primary-color;
+  }
+}
+
+.logo {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: $primary-color;
+  text-decoration: none;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.navLinks {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+  
+  @media (max-width: $breakpoint-md) {
+    display: none;
+  }
+}
+
+.navLink {
+  font-weight: 500;
+  color: $text-light;
+  text-decoration: none;
+  padding: 0.5rem 0;
+  position: relative;
+  transition: color 0.2s;
+  
+  &:hover {
+    color: $text-white;
+  }
+  
+  &.active {
+    color: $primary-color;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background-color: $primary-color;
+    }
+  }
+}
+
+.navbarRight {
+  display: flex;
+  align-items: center;
+}
+
+.userMenu {
+  position: relative;
+}
+
+.userButton {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: none;
+  border: none;
+  padding: 0.5rem;
+  border-radius: $border-radius-md;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  
+  &:hover {
+    background-color: rgba($primary-color, 0.2);
+  }
+}
+
+.userAvatar {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background-color: $primary-color;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+}
+
+.username {
+  font-weight: 500;
+  color: $text-primary;
+  
+  @media (max-width: $breakpoint-md) {
+    display: none;
+  }
+}
+
+.dropdown {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  width: 250px;
+  background-color: $bg-light;
+  border-radius: $border-radius-md;
+  box-shadow: $shadow-lg;
+  overflow: hidden;
+  z-index: 1000;
+}
+
+.dropdownHeader {
+  padding: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background-color: rgba($primary-color, 0.1);
+}
+
+.userAvatarLarge {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  background-color: $primary-color;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 1.25rem;
+}
+
+.usernameLarge {
+  font-weight: 600;
+  color: $text-primary;
+  margin-bottom: 0.25rem;
+}
+
+.userEmail {
+  font-size: 0.85rem;
+  color: $text-secondary;
+}
+
+.dropdownDivider {
+  height: 1px;
+  background-color: $border-color;
+  margin: 0.5rem 0;
+}
+
+.dropdownItem {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  color: $text-primary;
+  text-decoration: none;
+  transition: background-color 0.2s;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  border: none;
+  background: none;
+  
+  &:hover {
+    background-color: rgba($primary-color, 0.1);
+  }
+  
+  &:last-child {
+    color: $danger-color;
+    
+    &:hover {
+      background-color: rgba($danger-color, 0.1);
+    }
+  }
+}
+
+.dropdownIcon {
+  font-size: 1rem;
+}
+
+.authButtons {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.loginButton, .registerButton {
+  padding: 0.5rem 1rem;
+  border-radius: $border-radius-md;
+  font-weight: 500;
+  transition: all 0.2s;
+  text-decoration: none;
+}
+
+.loginButton {
+  color: $primary-color;
+  border: 1px solid $primary-color;
+  background-color: transparent;
+  
+  &:hover {
+    background-color: rgba($primary-color, 0.1);
+  }
+}
+
+.registerButton {
+  color: white;
+  background-color: $primary-color;
+  border: 1px solid $primary-color;
+  
+  &:hover {
+    background-color: darken($primary-color, 10%);
+  }
+}
+
+// Mobile styles
+@media (max-width: $breakpoint-md) {
+  .navbarContainer {
+    padding: 0.75rem 1rem;
+  }
+  
+  .authButtons {
+    .loginButton, .registerButton {
+      padding: 0.5rem 0.75rem;
+      font-size: 0.9rem;
+    }
+  }
+} 

@@ -1,0 +1,297 @@
+@import '../../styles/variables.scss';
+
+.mealPlanContainer {
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.pageTitle {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 2rem;
+  color: $primary-color;
+  text-align: center;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.loadingContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 50vh;
+  font-size: 1.2rem;
+  color: $text-light;
+}
+
+// Add meal section
+.addMealSection {
+  background-color: $bg-light;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: $shadow-sm;
+
+  h2 {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+    color: $text-white;
+  }
+}
+
+.addMealForm {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: flex-end;
+}
+
+.formGroup {
+  flex: 1;
+  min-width: 200px;
+  
+  label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: $text-light;
+  }
+}
+
+.select {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid $border-color;
+  border-radius: 4px;
+  background-color: $bg-lighter;
+  color: $text-primary;
+  font-size: 1rem;
+  
+  &:focus {
+    outline: none;
+    border-color: $primary-color;
+  }
+}
+
+.addButton {
+  background-color: $primary-color;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: background-color 0.2s;
+  
+  &:hover {
+    background-color: darken($primary-color, 10%);
+  }
+  
+  &:disabled {
+    background-color: lighten($primary-color, 20%);
+    cursor: not-allowed;
+  }
+}
+
+// Weekly plan section
+.weeklyPlanSection {
+  background-color: $bg-light;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: $shadow-sm;
+  
+  h2 {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+    color: $text-primary;
+  }
+}
+
+.weekGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+  overflow-x: auto;
+}
+
+.dayColumn {
+  min-width: 250px;
+  border: 1px solid $border-color;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.dayHeader {
+  background-color: $primary-color;
+  color: white;
+  padding: 0.75rem;
+  text-align: center;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.mealTimeSlot {
+  padding: 1rem;
+  border-bottom: 1px solid $border-color;
+}
+
+.mealTimeHeader {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  color: $text-light;
+}
+
+.mealsList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.mealCard {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: $bg-lighter;
+  border-radius: 4px;
+  padding: 0.75rem;
+  
+  &:hover {
+    background-color: rgba($primary-color, 0.1);
+  }
+}
+
+.mealInfo {
+  flex: 1;
+}
+
+.mealName {
+  display: block;
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+  color: $text-white;
+}
+
+.mealNutrition {
+  display: flex;
+  gap: 0.75rem;
+  font-size: 0.85rem;
+  color: $text-light;
+}
+
+.removeButton {
+  background: none;
+  border: none;
+  color: $danger-color;
+  cursor: pointer;
+  padding: 0.25rem;
+  
+  &:hover {
+    color: darken($danger-color, 10%);
+  }
+}
+
+.emptyMealSlot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background-color: $bg-lighter;
+  border-radius: 4px;
+  color: $text-light;
+  font-size: 0.9rem;
+  
+  .emptyIcon {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+    opacity: 0.5;
+  }
+}
+
+.dailyTotals {
+  padding: 1rem;
+  background-color: $bg-gray;
+  
+  h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    color: $text-white;
+  }
+}
+
+.totalsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem;
+}
+
+.totalItem {
+  display: flex;
+  flex-direction: column;
+}
+
+.totalLabel {
+  font-size: 0.85rem;
+  color: $text-light;
+}
+
+.totalValue {
+  font-weight: 600;
+  color: $text-white;
+}
+
+// Action buttons
+.actionButtons {
+  display: flex;
+  justify-content: center;
+  margin-top: 2rem;
+}
+
+.saveButton {
+  background-color: $success-color;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: background-color 0.2s;
+  
+  &:hover {
+    background-color: darken($success-color, 10%);
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .mealPlanContainer {
+    padding: 1rem;
+  }
+  
+  .addMealForm {
+    flex-direction: column;
+    
+    .formGroup {
+      width: 100%;
+    }
+  }
+  
+  .weekGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .dayColumn {
+    min-width: 100%;
+  }
+} 
