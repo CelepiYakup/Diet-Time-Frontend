@@ -4,7 +4,6 @@ import { useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { 
-  FaTimes, 
   FaHome, 
   FaChartLine, 
   FaUtensils, 
@@ -13,31 +12,28 @@ import {
   FaUsers, 
   FaCog,
   FaQuestionCircle,
-  FaBook
+  FaBook,
+  FaBullseye,
+  FaChevronRight
 } from 'react-icons/fa';
 import styles from './Sidebar.module.scss';
 import { useAuth } from '../../context/AuthContext';
 
 interface SidebarProps {
   isOpen: boolean;
+  isCollapsed: boolean;
   onClose: () => void;
 }
 
-const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
+const Sidebar = ({ isOpen, isCollapsed, onClose }: SidebarProps) => {
   const { isAuthenticated, user } = useAuth();
   const pathname = usePathname();
   const sidebarRef = useRef<HTMLDivElement>(null);
 
-  // Debug logs
-  useEffect(() => {
-    console.log('Sidebar props changed - isOpen:', isOpen);
-  }, [isOpen]);
-
   // Close sidebar when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (isOpen && sidebarRef.current && !sidebarRef.current.contains(event.target as Node)) {
-        console.log('Clicked outside sidebar, closing...');
+      if (isOpen && !isCollapsed && sidebarRef.current && !sidebarRef.current.contains(event.target as Node)) {
         onClose();
       }
     };
@@ -46,22 +42,33 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [isOpen, onClose]);
+  }, [isOpen, onClose, isCollapsed]);
 
   // Prevent scrolling when sidebar is open
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && !isCollapsed) {
       document.body.style.overflow = 'hidden';
-      console.log('Setting body overflow to hidden');
     } else {
       document.body.style.overflow = 'auto';
-      console.log('Setting body overflow to auto');
     }
     
     return () => {
       document.body.style.overflow = 'auto';
     };
-  }, [isOpen]);
+  }, [isOpen, isCollapsed]);
+
+  // Handle sidebar open/close/collapse states
+  const getSidebarClassName = () => {
+    if (!isOpen) {
+      return styles.sidebar;
+    }
+    
+    if (isCollapsed) {
+      return `${styles.sidebar} ${styles.closed}`;
+    }
+    
+    return `${styles.sidebar} ${styles.open}`;
+  };
 
   const navItems = [
     { path: '/', label: 'Home', icon: <FaHome /> },
@@ -72,6 +79,7 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
     { path: '/dashboard', label: 'Dashboard', icon: <FaChartLine /> },
     { path: '/meals', label: 'Meal Tracking', icon: <FaUtensils /> },
     { path: '/dashboard/meal-plans', label: 'Meal Planning', icon: <FaCalendarAlt /> },
+    { path: '/dashboard/goals', label: 'Goal Setting', icon: <FaBullseye /> },
     { path: '/progress', label: 'Progress Tracking', icon: <FaWeight /> },
     { path: '/community', label: 'Community', icon: <FaUsers /> },
     { path: '/settings', label: 'Settings', icon: <FaCog /> },
@@ -80,22 +88,21 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
 
   return (
     <>
-      <div 
-        className={`${styles.sidebarOverlay} ${isOpen ? styles.active : ''}`} 
-        onClick={() => {
-          console.log('Overlay clicked, closing sidebar...');
-          onClose();
-        }}
-      ></div>
+      {isOpen && !isCollapsed && (
+        <div 
+          className={`${styles.sidebarOverlay} ${styles.active}`} 
+          onClick={onClose}
+        ></div>
+      )}
+      
       <aside 
-        className={`${styles.sidebar} ${isOpen ? styles.open : ''}`} 
+        className={getSidebarClassName()} 
         ref={sidebarRef}
-        style={{ zIndex: 9999 }} // Force a high z-index
       >
         <div className={styles.sidebarHeader}>
           <div className={styles.sidebarLogo}>Diet Time</div>
-          <button className={styles.closeButton} onClick={onClose}>
-            <FaTimes />
+          <button className={styles.closeButton} onClick={() => onClose()}>
+            <FaChevronRight className={isCollapsed ? styles.collapsed : ''} />
           </button>
         </div>
 

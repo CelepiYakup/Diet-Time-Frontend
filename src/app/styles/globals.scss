@@ -12,21 +12,21 @@ body {
   overflow-x: hidden;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
     Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-  color: $text-primary;
-  background-color: $bg-dark;
+  color: #333333;
+  background-color: #f5f7fa;
   font-weight: $font-weight-normal;
   letter-spacing: 0.01em;
 }
 
 h1, h2, h3, h4, h5, h6 {
-  color: $text-white;
+  color: #333333;
   font-weight: $font-weight-semibold;
   letter-spacing: 0.02em;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 p, span, div {
-  color: $text-primary;
+  color: #333333;
 }
 
 a {
@@ -48,6 +48,7 @@ button {
 .main-content {
   flex: 1;
   padding: 1rem;
+  padding-top: 5.5rem;
   max-width: 1400px;
   width: 100%;
   margin: 0 auto;
@@ -70,42 +71,42 @@ button {
   text-align: center;
   
   &.btn-primary {
-    background-color: $primary-color;
+    background-color: #4a8eda;
     color: white;
-    border: 1px solid $primary-color;
+    border: 1px solid #4a8eda;
     
     &:hover {
-      background-color: darken($primary-color, 10%);
+      background-color: darken(#4a8eda, 10%);
     }
   }
   
   &.btn-secondary {
-    background-color: $secondary-color;
+    background-color: #4cd5c0;
     color: white;
-    border: 1px solid $secondary-color;
+    border: 1px solid #4cd5c0;
     
     &:hover {
-      background-color: darken($secondary-color, 10%);
+      background-color: darken(#4cd5c0, 10%);
     }
   }
   
   &.btn-outline {
     background-color: transparent;
-    color: $primary-color;
-    border: 1px solid $primary-color;
+    color: #4a8eda;
+    border: 1px solid #4a8eda;
     
     &:hover {
-      background-color: rgba($primary-color, 0.15);
+      background-color: rgba(74, 142, 218, 0.15);
     }
   }
   
   &.btn-danger {
-    background-color: $danger-color;
+    background-color: #ff6b6b;
     color: white;
-    border: 1px solid $danger-color;
+    border: 1px solid #ff6b6b;
     
     &:hover {
-      background-color: darken($danger-color, 10%);
+      background-color: darken(#ff6b6b, 10%);
     }
   }
   
@@ -134,40 +135,40 @@ button {
 .form-control {
   width: 100%;
   padding: 0.75rem;
-  border: 1px solid $border-color;
+  border: 1px solid #e0e4e8;
   border-radius: $border-radius-md;
   font-size: 1rem;
-  background-color: $bg-lighter;
-  color: $text-primary;
+  background-color: #ffffff;
+  color: #333333;
   
   &:focus {
     outline: none;
-    border-color: $primary-color;
-    box-shadow: 0 0 0 2px rgba($primary-color, 0.3);
+    border-color: #4a8eda;
+    box-shadow: 0 0 0 2px rgba(74, 142, 218, 0.3);
   }
   
   &.is-invalid {
-    border-color: $danger-color;
+    border-color: #ff6b6b;
   }
 }
 
 .form-error {
-  color: $danger-color;
+  color: #ff6b6b;
   font-size: 0.875rem;
   margin-top: 0.25rem;
 }
 
 // Card styles
 .card {
-  background-color: $bg-light;
+  background-color: #ffffff;
   border-radius: $border-radius-md;
-  box-shadow: $shadow-sm;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   overflow: hidden;
 }
 
 .card-header {
   padding: 1rem;
-  border-bottom: 1px solid $border-color;
+  border-bottom: 1px solid #e0e4e8;
 }
 
 .card-body {
@@ -176,7 +177,7 @@ button {
 
 .card-footer {
   padding: 1rem;
-  border-top: 1px solid $border-color;
+  border-top: 1px solid #e0e4e8;
 }
 
 // Responsive utilities
@@ -190,4 +191,12 @@ button {
   .main-content {
     padding: 0.5rem;
   }
+}
+
+// Page headings with proper spacing for fixed navbar
+h1.page-title {
+  margin-top: 0.5rem;
+  margin-bottom: 1.5rem;
+  padding-top: 0.5rem;
+  font-size: 2.2rem;
 } 

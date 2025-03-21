@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { FaPlus, FaSave, FaTrash, FaUtensils } from 'react-icons/fa';
 import styles from './page.module.scss';
+import LoadingIndicator from '@/app/components/LoadingIndicator';
 
 // Meal type definition
 interface Meal {
@@ -118,7 +119,7 @@ export default function MealPlanningPage() {
   };
 
   if (isLoading) {
-    return <div className={styles.loadingContainer}>Loading meal planning data...</div>;
+    return <LoadingIndicator text="Loading meal planning data..." />;
   }
 
   return (
@@ -186,71 +187,73 @@ export default function MealPlanningPage() {
       <div className={styles.weeklyPlanSection}>
         <h2>Weekly Meal Plan</h2>
         
-        <div className={styles.weekGrid}>
-          {days.map(day => (
-            <div key={day} className={styles.dayColumn}>
-              <h3 className={styles.dayHeader}>{day}</h3>
-              
-              {mealTimes.map(time => (
-                <div key={`${day}-${time}`} className={styles.mealTimeSlot}>
-                  <h4 className={styles.mealTimeHeader}>{time}</h4>
-                  
-                  <div className={styles.mealsList}>
-                    {getMealsForDayAndTime(day, time).map(meal => (
-                      <div key={meal.id} className={styles.mealCard}>
-                        <div className={styles.mealInfo}>
-                          <span className={styles.mealName}>{meal.name}</span>
-                          <div className={styles.mealNutrition}>
-                            <span>{meal.calories} cal</span>
-                            <span>{meal.protein}g protein</span>
-                          </div>
-                        </div>
-                        <button 
-                          className={styles.removeButton}
-                          onClick={() => removeMealFromPlan(meal.id)}
-                        >
-                          <FaTrash />
-                        </button>
-                      </div>
-                    ))}
+        <Suspense fallback={<LoadingIndicator text="Loading weekly meal plan..." />}>
+          <div className={styles.weekGrid}>
+            {days.map(day => (
+              <div key={day} className={styles.dayColumn}>
+                <h3 className={styles.dayHeader}>{day}</h3>
+                
+                {mealTimes.map(time => (
+                  <div key={`${day}-${time}`} className={styles.mealTimeSlot}>
+                    <h4 className={styles.mealTimeHeader}>{time}</h4>
                     
-                    {getMealsForDayAndTime(day, time).length === 0 && (
-                      <div className={styles.emptyMealSlot}>
-                        <FaUtensils className={styles.emptyIcon} />
-                        <span>No meal planned</span>
-                      </div>
-                    )}
+                    <div className={styles.mealsList}>
+                      {getMealsForDayAndTime(day, time).map(meal => (
+                        <div key={meal.id} className={styles.mealCard}>
+                          <div className={styles.mealInfo}>
+                            <span className={styles.mealName}>{meal.name}</span>
+                            <div className={styles.mealNutrition}>
+                              <span>{meal.calories} cal</span>
+                              <span>{meal.protein}g protein</span>
+                            </div>
+                          </div>
+                          <button 
+                            className={styles.removeButton}
+                            onClick={() => removeMealFromPlan(meal.id)}
+                          >
+                            <FaTrash />
+                          </button>
+                        </div>
+                      ))}
+                      
+                      {getMealsForDayAndTime(day, time).length === 0 && (
+                        <div className={styles.emptyMealSlot}>
+                          <FaUtensils className={styles.emptyIcon} />
+                          <span>No meal planned</span>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))}
-              
-              <div className={styles.dailyTotals}>
-                <h4>Daily Totals</h4>
-                <div className={styles.totalsGrid}>
-                  <div className={styles.totalItem}>
-                    <span className={styles.totalLabel}>Calories</span>
-                    <span className={styles.totalValue}>{calculateDailyTotals(day).calories}</span>
-                  </div>
-                  <div className={styles.totalItem}>
-                    <span className={styles.totalLabel}>Protein</span>
-                    <span className={styles.totalValue}>{calculateDailyTotals(day).protein}g</span>
-                  </div>
-                  <div className={styles.totalItem}>
-                    <span className={styles.totalLabel}>Carbs</span>
-                    <span className={styles.totalValue}>{calculateDailyTotals(day).carbs}g</span>
-                  </div>
-                  <div className={styles.totalItem}>
-                    <span className={styles.totalLabel}>Fat</span>
-                    <span className={styles.totalValue}>{calculateDailyTotals(day).fat}g</span>
+                ))}
+                
+                <div className={styles.dailyTotals}>
+                  <h4>Daily Totals</h4>
+                  <div className={styles.totalsGrid}>
+                    <div className={styles.totalItem}>
+                      <span className={styles.totalLabel}>Calories</span>
+                      <span className={styles.totalValue}>{calculateDailyTotals(day).calories}</span>
+                    </div>
+                    <div className={styles.totalItem}>
+                      <span className={styles.totalLabel}>Protein</span>
+                      <span className={styles.totalValue}>{calculateDailyTotals(day).protein}g</span>
+                    </div>
+                    <div className={styles.totalItem}>
+                      <span className={styles.totalLabel}>Carbs</span>
+                      <span className={styles.totalValue}>{calculateDailyTotals(day).carbs}g</span>
+                    </div>
+                    <div className={styles.totalItem}>
+                      <span className={styles.totalLabel}>Fat</span>
+                      <span className={styles.totalValue}>{calculateDailyTotals(day).fat}g</span>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        </Suspense>
       </div>
       
-      <div className={styles.actionButtons}>
+      <div className={styles.saveSection}>
         <button className={styles.saveButton}>
           <FaSave /> Save Meal Plan
         </button>

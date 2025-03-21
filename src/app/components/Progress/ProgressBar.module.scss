@@ -1,0 +1,79 @@
+.progressContainer {
+  width: 100%;
+  margin: 15px 0;
+  position: relative;
+}
+
+.progressBar {
+  width: 100%;
+  height: 10px;
+  background-color: #e8edf2;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.progressFill {
+  height: 100%;
+  border-radius: 10px;
+  background: linear-gradient(90deg, #4caf50, #8bc34a);
+  transition: width 0.5s ease-in-out;
+  
+  &.danger {
+    background: linear-gradient(90deg, #f44336, #ff9800);
+  }
+  
+  &.warning {
+    background: linear-gradient(90deg, #ff9800, #ffc107);
+  }
+  
+  &.success {
+    background: linear-gradient(90deg, #4caf50, #8bc34a);
+  }
+}
+
+.progressLabels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 5px;
+  font-size: 0.8rem;
+  color: #5a6171;
+}
+
+.progressValue {
+  position: absolute;
+  top: -22px;
+  right: 0;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #5a6171;
+}
+
+.progressTitle {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #3a4354;
+  margin-bottom: 5px;
+}
+
+/* Hover effect */
+.progressContainer:hover .progressFill {
+  box-shadow: 0 0 5px rgba(76, 175, 80, 0.5);
+}
+
+/* Animated progress */
+@keyframes pulse {
+  0% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.6;
+  }
+}
+
+.pulsing {
+  animation: pulse 1.5s infinite ease-in-out;
+} 

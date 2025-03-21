@@ -13,14 +13,12 @@ export default function Home() {
       icon: '🍽️',
       title: 'Personalized Meal Plans',
       description: 'Create highly personalized meal plans that cater to your unique dietary requirements and preferences.',
-      quickAccess: '/meal-plans'
     },
     {
       id: 'progress-monitoring',
       icon: '📊',
       title: 'Dietary Progress Monitoring',
       description: 'Track your dietary progress with precision using real-time tracking and visualization tools.',
-      quickAccess: '/progress-monitoring'
     },
     {
       id: 'communication',
@@ -33,7 +31,6 @@ export default function Home() {
       icon: '❤️',
       title: 'Health Data Tracking',
       description: 'Track essential health data such as body measurements, blood pressure, and cholesterol levels.',
-      quickAccess: '/health-tracking'
     },
     {
       id: 'goal-setting',
@@ -87,14 +84,6 @@ export default function Home() {
               <p className={styles.featureDescription}>
                 {feature.description}
               </p>
-              <Link href={`/features/${feature.id}`} className={styles.featureLink}>
-                Learn more
-              </Link>
-              {feature.quickAccess && (
-                <Link href={feature.quickAccess} className={styles.quickAccessLink}>
-                  Quick Access
-                </Link>
-              )}
             </div>
           ))}
         </div>

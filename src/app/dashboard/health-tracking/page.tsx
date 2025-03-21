@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { FaPlus, FaChartLine, FaWeight, FaHeartbeat, FaTint, FaBed } from 'react-icons/fa';
+import { FaPlus, FaChartLine, FaWeight, FaHeartbeat, FaTint, FaBed, FaEdit, FaTrash } from 'react-icons/fa';
 import styles from './page.module.scss';
 import { Line } from 'react-chartjs-2';
 import {
@@ -15,7 +15,9 @@ import {
   Legend
 } from 'chart.js';
 import Sidebar from '../../components/Sidebar/Sidebar';
-import Navbar from '../../components/Navbar/Navbar';
+import { useAuth } from '../../context/AuthContext';
+import LoadingIndicator from '../../components/LoadingIndicator';
+
 
 // Register ChartJS components
 ChartJS.register(
@@ -28,10 +30,16 @@ ChartJS.register(
   Legend
 );
 
-type BodyMeasurement = { id: string; date: string; weight: string; bmi: string; bodyFat: string; waist: string; };
-type VitalSign = { id: string; date: string; heartRate: string; bloodPressure: string; temperature: string; respiratoryRate: string; };
-type BloodWork = { id: string; date: string; glucose: string; cholesterol: string; hdl: string; ldl: string; triglycerides: string; };
-type SleepPattern = { id: string; date: string; duration: string; quality: string; deepSleep: string; remSleep: string; };
+// Entry tipleri için interface'ler ekleyelim
+interface BaseEntry {
+  id: string;
+  date: string;
+}
+
+type BodyMeasurement = BaseEntry & { weight: string; bmi: string; body_fat: string; waist: string; };
+type VitalSign = BaseEntry & { heart_rate: string; blood_pressure: string; temperature: string; respiratory_rate: string; };
+type BloodWork = BaseEntry & { glucose: string; cholesterol: string; hdl: string; ldl: string; triglycerides: string; };
+type SleepPattern = BaseEntry & { duration: string; quality: string; deep_sleep: string; rem_sleep: string; };
 
 type FormData = {
   date: string;
@@ -58,37 +66,39 @@ type FormData = {
   remSleep?: string;
 };
 
+// Tarih ve saat sorunlarını çözmek için formatDate fonksiyonu güncelleyelim
+const formatDate = (dateString: string) => {
+  if (!dateString) return '';
+  
+  // ISO string olup olmadığını kontrol et (2025-03-19T21:00:00.000Z gibi)
+  if (dateString.includes('T')) {
+    const date = new Date(dateString);
+    return date.toLocaleDateString();
+  }
+  
+  // Zaten sadece tarih formatında ise olduğu gibi döndür
+  return dateString;
+};
+
 export default function HealthTrackingDashboard() {
+  const { user, isAuthenticated } = useAuth();
   const [bodyMeasurements, setBodyMeasurements] = useState<BodyMeasurement[]>([]);
   const [vitalSigns, setVitalSigns] = useState<VitalSign[]>([]);
   const [bloodWork, setBloodWork] = useState<BloodWork[]>([]);
   const [sleepPatterns, setSleepPatterns] = useState<SleepPattern[]>([]);
   const [activeTab, setActiveTab] = useState('bodyMeasurements');
   const [showForm, setShowForm] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState<FormData>({
     date: new Date().toISOString().split('T')[0]
   });
   
+  // State for sidebar visibility
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  // Sidebar toggle fonksiyonu
+  // Toggle sidebar visibility
   const toggleSidebar = () => {
-    console.log('Sidebar toggle çağrıldı, mevcut durum:', isSidebarOpen);
-    
-    // DOM'da sidebar elementini kontrol et
-    const sidebarElement = document.querySelector('[class*="Sidebar_sidebar"]');
-    console.log('Sidebar element:', sidebarElement);
-    
-    // Sidebar class'larını kontrol et
-    if (sidebarElement) {
-      console.log('Sidebar class list:', sidebarElement.className);
-    }
-    
-    // State'i güncelle
-    setIsSidebarOpen(prevState => {
-      console.log('Sidebar state güncelleniyor:', prevState, ' -> ', !prevState);
-      return !prevState;
-    });
+    setIsSidebarOpen(!isSidebarOpen);
   };
 
   // Sidebar durumunu izleyelim
@@ -111,8 +121,14 @@ export default function HealthTrackingDashboard() {
   // GET isteklerini fetch ile gerçekleştiriyoruz.
   useEffect(() => {
     const fetchData = async () => {
+      if (!user) {
+        setLoading(false);
+        return;
+      }
+
       try {
-        const userId = 1; // Örnek kullanıcı ID'si
+        setLoading(true);
+        const userId = user.id;
         const [bodyRes, vitalRes, bloodRes, sleepRes] = await Promise.all([
           fetch(`/api/health/body-measurements/user/${userId}`),
           fetch(`/api/health/vital-signs/user/${userId}`),
@@ -154,11 +170,13 @@ export default function HealthTrackingDashboard() {
         setVitalSigns([]);
         setBloodWork([]);
         setSleepPatterns([]);
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchData();
-  }, []);
+  }, [user]);
 
   const handleTabChange = (tab: string) => {
     setActiveTab(tab);
@@ -183,26 +201,148 @@ export default function HealthTrackingDashboard() {
     setFormData({ ...formData, [name]: value });
   };
 
-  // POST isteklerini fetch ile gerçekleştiriyoruz.
+  // Edit ve Delete işlemlerini yapacak fonksiyonlar ekleyelim
+  const [editingEntryId, setEditingEntryId] = useState<string | null>(null);
+
+  const handleEditEntry = (type: string, entry: BodyMeasurement | VitalSign | BloodWork | SleepPattern) => {
+    setActiveTab(type);
+    // Her veri tipi için ayrı bir şekilde işlem yapalım
+    if (type === 'bodyMeasurements') {
+      const bodyEntry = entry as BodyMeasurement;
+      setFormData({
+        date: bodyEntry.date,
+        weight: bodyEntry.weight,
+        bmi: bodyEntry.bmi,
+        bodyFat: bodyEntry.body_fat,
+        waist: bodyEntry.waist
+      });
+    } else if (type === 'vitalSigns') {
+      const vitalEntry = entry as VitalSign;
+      setFormData({
+        date: vitalEntry.date,
+        heartRate: vitalEntry.heart_rate,
+        bloodPressure: vitalEntry.blood_pressure,
+        temperature: vitalEntry.temperature,
+        respiratoryRate: vitalEntry.respiratory_rate
+      });
+    } else if (type === 'bloodWork') {
+      const bloodEntry = entry as BloodWork;
+      setFormData({
+        date: bloodEntry.date,
+        glucose: bloodEntry.glucose,
+        cholesterol: bloodEntry.cholesterol,
+        hdl: bloodEntry.hdl,
+        ldl: bloodEntry.ldl,
+        triglycerides: bloodEntry.triglycerides
+      });
+    } else if (type === 'sleepPatterns') {
+      const sleepEntry = entry as SleepPattern;
+      setFormData({
+        date: sleepEntry.date,
+        duration: sleepEntry.duration,
+        quality: sleepEntry.quality,
+        deepSleep: sleepEntry.deep_sleep,
+        remSleep: sleepEntry.rem_sleep
+      });
+    }
+    
+    // Düzenlenen kaydın id'sini sakla
+    setEditingEntryId(entry.id);
+    setShowForm(true);
+  };
+
+  const handleDeleteEntry = async (type: string, id: string) => {
+    if (!confirm('Bu kaydı silmek istediğinizden emin misiniz?')) return;
+    if (!user) return;
+    
+    try {
+      const userId = user.id;
+      let url = '';
+      
+      if (type === 'bodyMeasurements') {
+        url = `/api/health/body-measurements/${id}`;
+      } else if (type === 'vitalSigns') {
+        url = `/api/health/vital-signs/${id}`;
+      } else if (type === 'bloodWork') {
+        url = `/api/health/blood-work/${id}`;
+      } else if (type === 'sleepPatterns') {
+        url = `/api/health/sleep-patterns/${id}`;
+      }
+      
+      console.log(`Deleting entry at: ${url}`);
+      
+      const response = await fetch(url, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      
+      // Response body'sini loglayalım (hata ayıklama için)
+      const responseText = await response.text();
+      console.log(`Delete response: ${response.status}, Body: ${responseText}`);
+      
+      // İşlem başarılı olmasa bile veriyi yenileyelim
+      // Veriyi yeniden yükle
+      const [bodyRes, vitalRes, bloodRes, sleepRes] = await Promise.all([
+        fetch(`/api/health/body-measurements/user/${userId}`),
+        fetch(`/api/health/vital-signs/user/${userId}`),
+        fetch(`/api/health/blood-work/user/${userId}`),
+        fetch(`/api/health/sleep-patterns/user/${userId}`)
+      ]);
+      
+      if (bodyRes.ok) {
+        const bodyData = await bodyRes.json();
+        setBodyMeasurements(bodyData);
+      }
+      if (vitalRes.ok) {
+        const vitalData = await vitalRes.json();
+        setVitalSigns(vitalData);
+      }
+      if (bloodRes.ok) {
+        const bloodData = await bloodRes.json();
+        setBloodWork(bloodData);
+      }
+      if (sleepRes.ok) {
+        const sleepData = await sleepRes.json();
+        setSleepPatterns(sleepData);
+      }
+      
+      // İşlemin başarılı olduğuna dair bildirim
+      alert('Kayıt başarıyla silindi.');
+    } catch (error) {
+      console.error('Error deleting entry:', error);
+      alert('Kayıt silinirken bir hata oluştu. Lütfen tekrar deneyin.');
+    }
+  };
+
+  // handleSubmit fonksiyonunu güncelle
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (!user) return;
+    
     try {
-      const userId = 1; // Örnek kullanıcı ID'si
+      const userId = user.id;
       let url = '';
       let dataToSend = {};
+      const method = editingEntryId ? 'PUT' : 'POST';
       
       if (activeTab === 'bodyMeasurements') {
-        url = '/api/health/body-measurements';
+        url = editingEntryId 
+          ? `/api/health/body-measurements/${editingEntryId}` 
+          : '/api/health/body-measurements';
         dataToSend = {
           user_id: userId,
           date: formData.date,
           weight: formData.weight,
           bmi: formData.bmi,
-          bodyFat: formData.bodyFat,
+          body_fat: formData.bodyFat,
           waist: formData.waist
         };
       } else if (activeTab === 'vitalSigns') {
-        url = '/api/health/vital-signs';
+        url = editingEntryId 
+          ? `/api/health/vital-signs/${editingEntryId}` 
+          : '/api/health/vital-signs';
+        
+        // Form verilerini backend API field isimleriyle eşleştir
         dataToSend = {
           user_id: userId,
           date: formData.date,
@@ -212,7 +352,9 @@ export default function HealthTrackingDashboard() {
           respiratory_rate: formData.respiratoryRate
         };
       } else if (activeTab === 'bloodWork') {
-        url = '/api/health/blood-work';
+        url = editingEntryId 
+          ? `/api/health/blood-work/${editingEntryId}` 
+          : '/api/health/blood-work';
         dataToSend = {
           user_id: userId,
           date: formData.date,
@@ -223,7 +365,9 @@ export default function HealthTrackingDashboard() {
           triglycerides: formData.triglycerides
         };
       } else if (activeTab === 'sleepPatterns') {
-        url = '/api/health/sleep-patterns';
+        url = editingEntryId 
+          ? `/api/health/sleep-patterns/${editingEntryId}` 
+          : '/api/health/sleep-patterns';
         dataToSend = {
           user_id: userId,
           date: formData.date,
@@ -234,11 +378,11 @@ export default function HealthTrackingDashboard() {
         };
       }
       
-      console.log('Sending data to:', url);
+      console.log(`${editingEntryId ? 'Updating' : 'Creating'} data at:`, url);
       console.log('Data being sent:', dataToSend);
       
       const response = await fetch(url, {
-        method: 'POST',
+        method: method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(dataToSend)
       });
@@ -246,11 +390,11 @@ export default function HealthTrackingDashboard() {
       if (!response.ok) {
         const errorText = await response.text();
         console.error('Server response:', response.status, errorText);
-        throw new Error(`Error submitting health data: ${response.status} ${response.statusText}`);
+        throw new Error(`Error ${editingEntryId ? 'updating' : 'submitting'} health data: ${response.status} ${response.statusText}`);
       }
       
       const result = await response.json();
-      console.log('Submission successful:', result);
+      console.log(`${editingEntryId ? 'Update' : 'Submission'} successful:`, result);
       
       // Refresh data after successful submission
       const fetchData = async () => {
@@ -273,10 +417,11 @@ export default function HealthTrackingDashboard() {
       
       fetchData();
       
-      // Reset form
+      // Reset form and editing state
       setFormData({
         date: new Date().toISOString().split('T')[0]
       });
+      setEditingEntryId(null);
       
     } catch (error) {
       console.error('Error submitting health data:', error);
@@ -289,7 +434,7 @@ export default function HealthTrackingDashboard() {
   const renderBodyMeasurements = () => {
     // Prepare data for weight trend chart
     const chartData = {
-      labels: bodyMeasurements.map(entry => entry.date).reverse(),
+      labels: bodyMeasurements.map(entry => formatDate(entry.date)).reverse(),
       datasets: [
         {
           label: 'Weight (lbs)',
@@ -347,16 +492,33 @@ export default function HealthTrackingDashboard() {
                 <th>BMI</th>
                 <th>Body Fat %</th>
                 <th>Waist (in)</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
               {bodyMeasurements.map(entry => (
                 <tr key={entry.id}>
-                  <td>{entry.date}</td>
+                  <td>{formatDate(entry.date)}</td>
                   <td>{entry.weight}</td>
                   <td>{entry.bmi}</td>
-                  <td>{entry.bodyFat}%</td>
+                  <td>{entry.body_fat ? `${entry.body_fat}%` : '-'}</td>
                   <td>{entry.waist}</td>
+                  <td className={styles.actionButtons}>
+                    <button 
+                      className={styles.editButton} 
+                      onClick={() => handleEditEntry('bodyMeasurements', entry)}
+                      aria-label="Edit"
+                    >
+                      <FaEdit />
+                    </button>
+                    <button 
+                      className={styles.deleteButton} 
+                      onClick={() => handleDeleteEntry('bodyMeasurements', entry.id)}
+                      aria-label="Delete"
+                    >
+                      <FaTrash />
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -380,11 +542,11 @@ export default function HealthTrackingDashboard() {
   const renderVitalSigns = () => {
     // Prepare data for heart rate trend chart
     const chartData = {
-      labels: vitalSigns.map(entry => entry.date).reverse(),
+      labels: vitalSigns.map(entry => formatDate(entry.date)).reverse(),
       datasets: [
         {
           label: 'Heart Rate (bpm)',
-          data: vitalSigns.map(entry => parseFloat(entry.heartRate)).reverse(),
+          data: vitalSigns.map(entry => parseFloat(entry.heart_rate)).reverse(),
           fill: false,
           backgroundColor: 'rgba(255, 99, 132, 0.2)',
           borderColor: 'rgba(255, 99, 132, 1)',
@@ -438,16 +600,33 @@ export default function HealthTrackingDashboard() {
                 <th>Blood Pressure</th>
                 <th>Temperature (°F)</th>
                 <th>Respiratory Rate</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
               {vitalSigns.map(entry => (
                 <tr key={entry.id}>
-                  <td>{entry.date}</td>
-                  <td>{entry.heartRate}</td>
-                  <td>{entry.bloodPressure}</td>
+                  <td>{formatDate(entry.date)}</td>
+                  <td>{entry.heart_rate}</td>
+                  <td>{entry.blood_pressure}</td>
                   <td>{entry.temperature}</td>
-                  <td>{entry.respiratoryRate}</td>
+                  <td>{entry.respiratory_rate}</td>
+                  <td className={styles.actionButtons}>
+                    <button 
+                      className={styles.editButton} 
+                      onClick={() => handleEditEntry('vitalSigns', entry)}
+                      aria-label="Edit"
+                    >
+                      <FaEdit />
+                    </button>
+                    <button 
+                      className={styles.deleteButton} 
+                      onClick={() => handleDeleteEntry('vitalSigns', entry.id)}
+                      aria-label="Delete"
+                    >
+                      <FaTrash />
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -471,7 +650,7 @@ export default function HealthTrackingDashboard() {
   const renderBloodWork = () => {
     // Prepare data for cholesterol levels chart
     const cholesterolChartData = {
-      labels: bloodWork.map(entry => entry.date).reverse(),
+      labels: bloodWork.map(entry => formatDate(entry.date)).reverse(),
       datasets: [
         {
           label: 'Total Cholesterol',
@@ -506,7 +685,7 @@ export default function HealthTrackingDashboard() {
 
     // Prepare data for glucose trend chart
     const glucoseChartData = {
-      labels: bloodWork.map(entry => entry.date).reverse(),
+      labels: bloodWork.map(entry => formatDate(entry.date)).reverse(),
       datasets: [
         {
           label: 'Glucose (mg/dL)',
@@ -593,17 +772,34 @@ export default function HealthTrackingDashboard() {
                 <th>HDL</th>
                 <th>LDL</th>
                 <th>Triglycerides</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
               {bloodWork.map(entry => (
                 <tr key={entry.id}>
-                  <td>{entry.date}</td>
+                  <td>{formatDate(entry.date)}</td>
                   <td>{entry.glucose}</td>
                   <td>{entry.cholesterol}</td>
                   <td>{entry.hdl}</td>
                   <td>{entry.ldl}</td>
                   <td>{entry.triglycerides}</td>
+                  <td className={styles.actionButtons}>
+                    <button 
+                      className={styles.editButton} 
+                      onClick={() => handleEditEntry('bloodWork', entry)}
+                      aria-label="Edit"
+                    >
+                      <FaEdit />
+                    </button>
+                    <button 
+                      className={styles.deleteButton} 
+                      onClick={() => handleDeleteEntry('bloodWork', entry.id)}
+                      aria-label="Delete"
+                    >
+                      <FaTrash />
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -640,25 +836,29 @@ export default function HealthTrackingDashboard() {
   const renderSleepPatterns = () => {
     // Prepare data for sleep duration trend chart
     const chartData = {
-      labels: sleepPatterns.map(entry => entry.date).reverse(),
+      labels: sleepPatterns.map(entry => formatDate(entry.date)).reverse(),
       datasets: [
         {
           label: 'Total Sleep (hrs)',
-          data: sleepPatterns.map(entry => parseFloat(entry.duration)).reverse(),
+          data: sleepPatterns.map(entry => parseFloat(entry.duration || '0')).reverse(),
           backgroundColor: 'rgba(153, 102, 255, 0.2)',
           borderColor: 'rgba(153, 102, 255, 1)',
           tension: 0.1
         },
         {
           label: 'Deep Sleep (hrs)',
-          data: sleepPatterns.map(entry => parseFloat(entry.deepSleep)).reverse(),
+          data: sleepPatterns.map(entry => {
+            return entry.deep_sleep ? parseFloat(entry.deep_sleep) : null;
+          }).reverse(),
           backgroundColor: 'rgba(54, 162, 235, 0.2)',
           borderColor: 'rgba(54, 162, 235, 1)',
           tension: 0.1
         },
         {
           label: 'REM Sleep (hrs)',
-          data: sleepPatterns.map(entry => parseFloat(entry.remSleep)).reverse(),
+          data: sleepPatterns.map(entry => {
+            return entry.rem_sleep ? parseFloat(entry.rem_sleep) : null;
+          }).reverse(),
           backgroundColor: 'rgba(255, 206, 86, 0.2)',
           borderColor: 'rgba(255, 206, 86, 1)',
           tension: 0.1
@@ -711,16 +911,33 @@ export default function HealthTrackingDashboard() {
                 <th>Quality</th>
                 <th>Deep Sleep (hrs)</th>
                 <th>REM Sleep (hrs)</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
               {sleepPatterns.map(entry => (
                 <tr key={entry.id}>
-                  <td>{entry.date}</td>
+                  <td>{formatDate(entry.date)}</td>
                   <td>{entry.duration}</td>
                   <td>{entry.quality}</td>
-                  <td>{entry.deepSleep}</td>
-                  <td>{entry.remSleep}</td>
+                  <td>{entry.deep_sleep || '-'}</td>
+                  <td>{entry.rem_sleep || '-'}</td>
+                  <td className={styles.actionButtons}>
+                    <button 
+                      className={styles.editButton} 
+                      onClick={() => handleEditEntry('sleepPatterns', entry)}
+                      aria-label="Edit"
+                    >
+                      <FaEdit />
+                    </button>
+                    <button 
+                      className={styles.deleteButton} 
+                      onClick={() => handleDeleteEntry('sleepPatterns', entry.id)}
+                      aria-label="Delete"
+                    >
+                      <FaTrash />
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -858,7 +1075,9 @@ export default function HealthTrackingDashboard() {
     return (
       <div className={`${styles.formOverlay} ${showForm ? styles.active : ''}`}>
         <div className={styles.formContainer}>
-          <h3 className={styles.formTitle}>Add New Health Data</h3>
+          <h3 className={styles.formTitle}>
+            {editingEntryId ? 'Edit Health Data' : 'Add New Health Data'}
+          </h3>
           <form onSubmit={handleSubmit}>
             {formFields}
             <div className={styles.formActions}>
@@ -877,8 +1096,13 @@ export default function HealthTrackingDashboard() {
 
   return (
     <div className={styles.pageContainer}>
-      <Navbar toggleSidebar={toggleSidebar} />
-      <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
+      {isSidebarOpen && (
+        <Sidebar 
+          isOpen={true} 
+          isCollapsed={true}
+          onClose={toggleSidebar} 
+        />
+      )}
       
       <div className={styles.healthTrackingContainer}>
         <div className={styles.dashboardHeader}>
@@ -904,93 +1128,104 @@ export default function HealthTrackingDashboard() {
           </button>
         </div>
         
-        <div className={styles.dashboardOverview}>
-          <div className={styles.overviewCard}>
-            <div className={styles.overviewIcon}>
-              <FaWeight />
-            </div>
-            <div className={styles.overviewData}>
-              <span className={styles.overviewLabel}>Current Weight</span>
-              <span className={styles.overviewValue}>
-                {bodyMeasurements.length > 0 ? bodyMeasurements[bodyMeasurements.length - 1].weight : 'N/A'} lbs
-              </span>
-            </div>
+        {!isAuthenticated ? (
+          <div className={styles.authMessage}>
+            <h2>Please log in to view your health data</h2>
+            <p>You need to be logged in to access your personal health tracking dashboard.</p>
           </div>
-          
-          <div className={styles.overviewCard}>
-            <div className={styles.overviewIcon}>
-              <FaHeartbeat />
+        ) : loading ? (
+          <LoadingIndicator text="Loading your health data..." />
+        ) : (
+          <>
+            <div className={styles.dashboardOverview}>
+              <div className={styles.overviewCard}>
+                <div className={styles.overviewIcon}>
+                  <FaWeight />
+                </div>
+                <div className={styles.overviewData}>
+                  <span className={styles.overviewLabel}>Current Weight</span>
+                  <span className={styles.overviewValue}>
+                    {bodyMeasurements.length > 0 ? bodyMeasurements[bodyMeasurements.length - 1].weight : 'N/A'} lbs
+                  </span>
+                </div>
+              </div>
+              
+              <div className={styles.overviewCard}>
+                <div className={styles.overviewIcon}>
+                  <FaHeartbeat />
+                </div>
+                <div className={styles.overviewData}>
+                  <span className={styles.overviewLabel}>Heart Rate</span>
+                  <span className={styles.overviewValue}>
+                    {vitalSigns.length > 0 ? vitalSigns[0].heart_rate : 'N/A'} bpm
+                  </span>
+                </div>
+              </div>
+              
+              <div className={styles.overviewCard}>
+                <div className={styles.overviewIcon}>
+                  <FaTint />
+                </div>
+                <div className={styles.overviewData}>
+                  <span className={styles.overviewLabel}>Blood Pressure</span>
+                  <span className={styles.overviewValue}>
+                    {vitalSigns.length > 0 ? vitalSigns[0].blood_pressure : 'N/A'}
+                  </span>
+                </div>
+              </div>
+              
+              <div className={styles.overviewCard}>
+                <div className={styles.overviewIcon}>
+                  <FaBed />
+                </div>
+                <div className={styles.overviewData}>
+                  <span className={styles.overviewLabel}>Sleep Duration</span>
+                  <span className={styles.overviewValue}>
+                    {sleepPatterns.length > 0 ? sleepPatterns[0].duration : 'N/A'} hrs
+                  </span>
+                </div>
+              </div>
             </div>
-            <div className={styles.overviewData}>
-              <span className={styles.overviewLabel}>Heart Rate</span>
-              <span className={styles.overviewValue}>
-                {vitalSigns.length > 0 ? vitalSigns[vitalSigns.length - 1].heartRate : 'N/A'} bpm
-              </span>
+            
+            <div className={styles.tabsContainer}>
+              <div className={styles.tabs}>
+                <button 
+                  className={`${styles.tabButton} ${activeTab === 'bodyMeasurements' ? styles.active : ''}`}
+                  onClick={() => handleTabChange('bodyMeasurements')}
+                >
+                  <FaWeight className={styles.tabIcon} /> Body Measurements
+                </button>
+                <button 
+                  className={`${styles.tabButton} ${activeTab === 'vitalSigns' ? styles.active : ''}`}
+                  onClick={() => handleTabChange('vitalSigns')}
+                >
+                  <FaHeartbeat className={styles.tabIcon} /> Vital Signs
+                </button>
+                <button 
+                  className={`${styles.tabButton} ${activeTab === 'bloodWork' ? styles.active : ''}`}
+                  onClick={() => handleTabChange('bloodWork')}
+                >
+                  <FaTint className={styles.tabIcon} /> Blood Work
+                </button>
+                <button 
+                  className={`${styles.tabButton} ${activeTab === 'sleepPatterns' ? styles.active : ''}`}
+                  onClick={() => handleTabChange('sleepPatterns')}
+                >
+                  <FaBed className={styles.tabIcon} /> Sleep Patterns
+                </button>
+              </div>
+              
+              <div className={styles.tabContent}>
+                {activeTab === 'bodyMeasurements' && renderBodyMeasurements()}
+                {activeTab === 'vitalSigns' && renderVitalSigns()}
+                {activeTab === 'bloodWork' && renderBloodWork()}
+                {activeTab === 'sleepPatterns' && renderSleepPatterns()}
+              </div>
             </div>
-          </div>
-          
-          <div className={styles.overviewCard}>
-            <div className={styles.overviewIcon}>
-              <FaTint />
-            </div>
-            <div className={styles.overviewData}>
-              <span className={styles.overviewLabel}>Blood Pressure</span>
-              <span className={styles.overviewValue}>
-                {vitalSigns.length > 0 ? vitalSigns[vitalSigns.length - 1].bloodPressure : 'N/A'}
-              </span>
-            </div>
-          </div>
-          
-          <div className={styles.overviewCard}>
-            <div className={styles.overviewIcon}>
-              <FaBed />
-            </div>
-            <div className={styles.overviewData}>
-              <span className={styles.overviewLabel}>Sleep Duration</span>
-              <span className={styles.overviewValue}>
-                {sleepPatterns.length > 0 ? sleepPatterns[sleepPatterns.length - 1].duration : 'N/A'} hrs
-              </span>
-            </div>
-          </div>
-        </div>
-        
-        <div className={styles.tabsContainer}>
-          <div className={styles.tabs}>
-            <button 
-              className={`${styles.tabButton} ${activeTab === 'bodyMeasurements' ? styles.active : ''}`}
-              onClick={() => handleTabChange('bodyMeasurements')}
-            >
-              <FaWeight className={styles.tabIcon} /> Body Measurements
-            </button>
-            <button 
-              className={`${styles.tabButton} ${activeTab === 'vitalSigns' ? styles.active : ''}`}
-              onClick={() => handleTabChange('vitalSigns')}
-            >
-              <FaHeartbeat className={styles.tabIcon} /> Vital Signs
-            </button>
-            <button 
-              className={`${styles.tabButton} ${activeTab === 'bloodWork' ? styles.active : ''}`}
-              onClick={() => handleTabChange('bloodWork')}
-            >
-              <FaTint className={styles.tabIcon} /> Blood Work
-            </button>
-            <button 
-              className={`${styles.tabButton} ${activeTab === 'sleepPatterns' ? styles.active : ''}`}
-              onClick={() => handleTabChange('sleepPatterns')}
-            >
-              <FaBed className={styles.tabIcon} /> Sleep Patterns
-            </button>
-          </div>
-          
-          <div className={styles.tabContent}>
-            {activeTab === 'bodyMeasurements' && renderBodyMeasurements()}
-            {activeTab === 'vitalSigns' && renderVitalSigns()}
-            {activeTab === 'bloodWork' && renderBloodWork()}
-            {activeTab === 'sleepPatterns' && renderSleepPatterns()}
-          </div>
-        </div>
-        
-        {renderForm()}
+            
+            {renderForm()}
+          </>
+        )}
       </div>
     </div>
   );

@@ -9,16 +9,17 @@ interface ClientLayoutProps {
 }
 
 const ClientLayout = ({ children }: ClientLayoutProps) => {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
+  const [isSidebarOpen] = useState(true);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
 
   return (
     <div className="app-container">
-      <Navbar toggleSidebar={toggleSidebar} />
-      <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
+      <Navbar />
+      <Sidebar 
+        isOpen={isSidebarOpen} 
+        isCollapsed={isSidebarCollapsed} 
+        onClose={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+      />
       <main className="main-content">
         {children}
       </main>

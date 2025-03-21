@@ -3,11 +3,11 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { FaBars, FaUser, FaSignOutAlt } from 'react-icons/fa';
+import { FaUser, FaSignOutAlt } from 'react-icons/fa';
 import styles from './Navbar.module.scss';
 import { useAuth } from '../../context/AuthContext';
 
-const Navbar = ({ toggleSidebar }: { toggleSidebar: () => void }) => {
+const Navbar = ({ }: { toggleSidebar?: () => void, isSidebarOpen?: boolean }) => {
   const { isAuthenticated, user, logout } = useAuth();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -39,9 +39,6 @@ const Navbar = ({ toggleSidebar }: { toggleSidebar: () => void }) => {
     <header className={`${styles.navbar} ${isScrolled ? styles.scrolled : ''}`}>
       <div className={styles.navbarContainer}>
         <div className={styles.navbarLeft}>
-          <button className={styles.sidebarToggle} onClick={toggleSidebar}>
-            <FaBars />
-          </button>
           <Link href="/" className={styles.logo}>
             Diet Time
           </Link>

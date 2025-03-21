@@ -7,13 +7,14 @@
 .featuresHeader {
   text-align: center;
   margin-bottom: 3rem;
+  padding-top: 0.5rem;
 }
 
 .title {
   font-size: 2.5rem;
   font-weight: 700;
   margin-bottom: 1rem;
-  color: var(--primary-color);
+  color: #4a8eda;
 }
 
 .subtitle {
@@ -177,8 +178,8 @@
 }
 
 .primaryButton {
-  background-color: white;
-  color: var(--primary-color);
+  background-color: #4a8eda;
+  color: #f8fafc;
   border: none;
   border-radius: 8px;
   padding: 0.75rem 1.5rem;

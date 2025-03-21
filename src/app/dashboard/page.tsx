@@ -5,8 +5,11 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import styles from './page.module.scss';
 import { useAuth } from '../context/AuthContext';
-import { mealApi, Meal } from '../services/api';
-import { FaUtensils, FaCalendarAlt, FaHeartbeat } from 'react-icons/fa';
+import { mealApi, Meal, goalApi, Goal } from '../services/api';
+import { FaUtensils, FaCalendarAlt, FaHeartbeat, FaBullseye, FaArrowRight, FaEdit, FaTrash } from 'react-icons/fa';
+import ProgressBar from '../components/Progress/ProgressBar';
+import LearnMore from '../components/LearnMore';
+import LoadingIndicator from '../components/LoadingIndicator';
 
 export default function Dashboard() {
   const router = useRouter();
@@ -18,6 +21,9 @@ export default function Dashboard() {
   const [totalFat, setTotalFat] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [activeGoals, setActiveGoals] = useState<Goal[]>([]);
+  const [isGoalsLoading, setIsGoalsLoading] = useState(true);
+  const [goalsError, setGoalsError] = useState<string | null>(null);
 
   useEffect(() => {
     // Redirect if not authenticated
@@ -56,7 +62,23 @@ export default function Dashboard() {
       }
     };
 
+    const fetchGoals = async () => {
+      if (!user) return;
+
+      try {
+        setIsGoalsLoading(true);
+        const fetchedGoals = await goalApi.getActiveGoals(user.id);
+        setActiveGoals(fetchedGoals);
+      } catch (error) {
+        console.error('Error fetching goals:', error);
+        setGoalsError('Failed to load goals');
+      } finally {
+        setIsGoalsLoading(false);
+      }
+    };
+
     fetchMeals();
+    fetchGoals();
   }, [isAuthenticated, router, user]);
 
   const handleDeleteMeal = async (mealId: number) => {
@@ -86,20 +108,132 @@ export default function Dashboard() {
     }
   };
 
+  // Format date for display in UTC
+  const formatDateInUTC = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { 
+      timeZone: 'UTC',
+      weekday: 'long', 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    });
+  };
+
   if (!isAuthenticated) {
     return null; // Don't render anything while redirecting
   }
 
   return (
     <div className={styles.dashboardContainer}>
-      <section className={styles.welcomeSection}>
-        <h1 className={styles.welcomeTitle}>Welcome, {user?.username}!</h1>
-        <p className={styles.welcomeSubtitle}>
-          Here&apos;s your nutrition summary for today
+      <section className={styles.dashboardHeader}>
+        <h1 className={styles.welcomeMessage}>Welcome back, {user?.username || 'User'}!</h1>
+        <p className={styles.dateDisplay}>
+          {formatDateInUTC(new Date().toISOString())}
         </p>
       </section>
 
-      <section className={styles.statsSection}>
+      {/* Quick Access Section */}
+      <section className={styles.quickAccessSection}>
+        <h2 className={styles.sectionTitle}>Quick Access</h2>
+        <div className={styles.quickAccessGrid}>
+          <Link href="/meals/add" className={styles.quickAccessCard}>
+            <div className={styles.quickAccessIcon}>
+              <FaUtensils />
+            </div>
+            <div className={styles.quickAccessContent}>
+              <h3>Add Meal</h3>
+              <p>Log your latest meal</p>
+            </div>
+          </Link>
+          
+          <Link href="/dashboard/meal-plans" className={styles.quickAccessCard}>
+            <div className={styles.quickAccessIcon}>
+              <FaCalendarAlt />
+            </div>
+            <div className={styles.quickAccessContent}>
+              <h3>Meal Plans</h3>
+              <p>View or create meal plans</p>
+            </div>
+          </Link>
+          
+          <Link href="/dashboard/goals" className={styles.quickAccessCard}>
+            <div className={styles.quickAccessIcon}>
+              <FaBullseye />
+            </div>
+            <div className={styles.quickAccessContent}>
+              <h3>Goal Setting</h3>
+              <p>Track your health goals</p>
+            </div>
+          </Link>
+          
+          <Link href="/dashboard/health-tracking" className={styles.quickAccessCard}>
+            <div className={styles.quickAccessIcon}>
+              <FaHeartbeat />
+            </div>
+            <div className={styles.quickAccessContent}>
+              <h3>Health Tracking</h3>
+              <p>Monitor your health metrics</p>
+            </div>
+          </Link>
+        </div>
+      </section>
+
+      {/* Active Goals Section */}
+      <section className={styles.activeGoalsSection}>
+        <div className={styles.sectionHeader}>
+          <h2 className={styles.sectionTitle}>Active Goals</h2>
+          <Link href="/dashboard/goals" className={styles.viewAllLink}>
+            View All <FaArrowRight className={styles.viewAllIcon} />
+          </Link>
+        </div>
+
+        {isGoalsLoading ? (
+          <LoadingIndicator text="Loading your goals..." />
+        ) : goalsError ? (
+          <div className={styles.errorState}>{goalsError}</div>
+        ) : activeGoals.length > 0 ? (
+          <div className={styles.goalsList}>
+            {activeGoals.slice(0, 3).map((goal) => (
+              <div key={goal.id} className={styles.goalCard}>
+                <div className={styles.goalHeader}>
+                  <div className={styles.goalCategory}>{goal.category}</div>
+                  <div className={styles.goalStatus}>{goal.status}</div>
+                </div>
+                <h3 className={styles.goalTitle}>{goal.title}</h3>
+                <p className={styles.goalDescription}>{goal.description}</p>
+                {goal.target_value && goal.current_value && (
+                  <div className={styles.goalProgress}>
+                    <ProgressBar 
+                      currentValue={goal.current_value}
+                      maxValue={goal.target_value}
+                      unit={goal.unit}
+                    />
+                  </div>
+                )}
+                <div className={styles.goalDates}>
+                  <div className={styles.goalDate}>
+                    <span>Start:</span> {new Date(goal.start_date).toLocaleDateString()}
+                  </div>
+                  <div className={styles.goalDate}>
+                    <span>Target:</span> {new Date(goal.target_date).toLocaleDateString()}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className={styles.emptyState}>
+            <p>You haven&apos;t set any goals yet.</p>
+            <Link href="/dashboard/goals" className="btn btn-primary">
+              Set Your First Goal
+            </Link>
+          </div>
+        )}
+      </section>
+
+      {/* Nutrition Summary Section */}
+      <section className={styles.nutritionSummarySection}>
         <div className={styles.statsGrid}>
           <div className={styles.statCard}>
             <div className={styles.statTitle}>Total Calories</div>
@@ -120,35 +254,7 @@ export default function Dashboard() {
         </div>
       </section>
 
-      <section className={styles.featuresSection}>
-        <h2 className={styles.sectionTitle}>Quick Access</h2>
-        <div className={styles.featuresGrid}>
-          <Link href="/meals" className={styles.featureCard}>
-            <div className={styles.featureIconWrapper}>
-              <FaUtensils className={styles.featureIcon} />
-            </div>
-            <h3 className={styles.featureTitle}>Meal Tracking</h3>
-            <p className={styles.featureDescription}>Log your daily meals and track your calorie intake</p>
-          </Link>
-          
-          <Link href="/dashboard/meal-plans" className={styles.featureCard}>
-            <div className={styles.featureIconWrapper}>
-              <FaCalendarAlt className={styles.featureIcon} />
-            </div>
-            <h3 className={styles.featureTitle}>Meal Planning</h3>
-            <p className={styles.featureDescription}>Plan your meals for the week and generate shopping lists</p>
-          </Link>
-
-          <Link href="/dashboard/health-tracking" className={styles.featureCard}>
-            <div className={styles.featureIconWrapper}>
-              <FaHeartbeat className={styles.featureIcon} />
-            </div>
-            <h3 className={styles.featureTitle}>Health Tracking</h3>
-            <p className={styles.featureDescription}>Monitor your health metrics and track your progress over time.</p>
-          </Link>
-        </div>
-      </section>
-
+      {/* Today's Meals Section */}
       <section className={styles.recentMealsSection}>
         <div className={styles.sectionHeader}>
           <h2 className={styles.sectionTitle}>Today&apos;s Meals</h2>
@@ -158,7 +264,7 @@ export default function Dashboard() {
         </div>
 
         {isLoading ? (
-          <div className={styles.loadingState}>Loading meals...</div>
+          <LoadingIndicator text="Loading your meals..." />
         ) : error ? (
           <div className={styles.errorState}>{error}</div>
         ) : meals.length > 0 ? (
@@ -189,13 +295,13 @@ export default function Dashboard() {
                 </div>
                 <div className={styles.mealActions}>
                   <Link href={`/meals/edit/${meal.id}`} className={styles.editButton}>
-                    Edit
+                    <FaEdit />
                   </Link>
                   <button 
                     className={styles.deleteButton}
                     onClick={() => handleDeleteMeal(meal.id)}
                   >
-                    Delete
+                    <FaTrash />
                   </button>
                 </div>
               </div>
@@ -209,6 +315,16 @@ export default function Dashboard() {
             </Link>
           </div>
         )}
+      </section>
+
+      {/* More sections and recommendations */}
+      <section className={styles.moreFeaturesSection}>
+        <LearnMore 
+          title="Discover More Diet Time Features"
+          description="Explore our comprehensive suite of tools designed to help you achieve your health and nutrition goals."
+          linkUrl="/features"
+          linkText="Explore All Features"
+        />
       </section>
     </div>
   );

@@ -2,6 +2,7 @@
 
 .dashboardContainer {
   padding: 1rem 0;
+  padding-top: 1rem;
 }
 
 .welcomeSection {
@@ -13,12 +14,12 @@
   font-size: 2rem;
   font-weight: 700;
   margin-bottom: 0.5rem;
-  color: $text-white;
+  color: #000000;
 }
 
 .welcomeSubtitle {
   font-size: 1.1rem;
-  color: $text-light;
+  color: #000000;
 }
 
 .statsSection {
@@ -32,30 +33,30 @@
 }
 
 .statCard {
-  background-color: $bg-light;
+  background-color: #ffffff;
   border-radius: 8px;
   padding: 1.5rem;
   text-align: center;
-  box-shadow: $shadow-sm;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   transition: transform 0.2s, box-shadow 0.2s;
   
   &:hover {
     transform: translateY(-5px);
-    box-shadow: $shadow-md;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   }
 }
 
 .statTitle {
   font-size: 0.9rem;
-  color: $text-light;
+  color: #666666;
   margin-bottom: 0.5rem;
 }
 
 .statValue {
   font-size: 2rem;
   font-weight: 700;
-  color: $primary-color;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  color: #4a8eda;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .sectionHeader {
@@ -68,7 +69,7 @@
 .sectionTitle {
   font-size: 1.5rem;
   font-weight: 600;
-  color: $text-white;
+  color: #000000;
 }
 
 .addButton {
@@ -88,10 +89,10 @@
 }
 
 .mealCard {
-  background-color: $bg-light;
+  background-color: #ffffff;
   border-radius: 8px;
   overflow: hidden;
-  box-shadow: $shadow-sm;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   transition: transform 0.2s;
   
   &:hover {
@@ -104,17 +105,17 @@
   justify-content: space-between;
   align-items: center;
   padding: 1rem;
-  background-color: rgba($primary-color, 0.1);
+  background-color: rgba(74, 142, 218, 0.1);
 }
 
 .mealName {
   font-weight: 600;
-  color: $text-primary;
+  color: #333333;
 }
 
 .mealTime {
   font-size: 0.85rem;
-  color: $text-secondary;
+  color: #666666;
 }
 
 .mealDetails {
@@ -131,62 +132,68 @@
 
 .mealDetailLabel {
   font-size: 0.8rem;
-  color: $text-light;
+  color: #666666;
   margin-bottom: 0.25rem;
 }
 
 .mealDetailValue {
   font-weight: 600;
-  color: $text-primary;
+  color: #333333;
 }
 
 .mealActions {
   display: flex;
-  border-top: 1px solid $border-color;
+  gap: 0.5rem;
+  margin-top: 1rem;
 }
 
 .editButton, .deleteButton {
-  flex: 1;
-  padding: 0.75rem;
-  text-align: center;
-  font-weight: 500;
-  transition: background-color 0.2s;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 1rem;
+  color: #ffffff;
 }
 
 .editButton {
-  color: $primary-color;
-  border-right: 1px solid $border-color;
+  background-color: var(--primary-color);
   
   &:hover {
-    background-color: rgba($primary-color, 0.1);
+    background-color: darken(#4a8eda, 10%);
   }
 }
 
 .deleteButton {
-  color: $danger-color;
+  background-color: var(--danger-color);
   
   &:hover {
-    background-color: rgba($danger-color, 0.1);
+    background-color: darken(#dc3545, 10%);
   }
 }
 
 .loadingState, .errorState, .emptyState {
   padding: 2rem;
   text-align: center;
-  background-color: $bg-light;
+  background-color: #ffffff;
   border-radius: 8px;
 }
 
 .loadingState {
-  color: $text-secondary;
+  color: #666666;
 }
 
 .errorState {
-  color: $danger-color;
+  color: #ff6b6b;
 }
 
 .emptyState {
-  color: $text-secondary;
+  color: #666666;
   
   p {
     margin-bottom: 1rem;
@@ -210,16 +217,16 @@
   flex-direction: column;
   align-items: center;
   padding: 1.5rem;
-  background-color: $bg-light;
+  background-color: #ffffff;
   border-radius: 8px;
-  box-shadow: $shadow-sm;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   transition: transform 0.2s, box-shadow 0.2s;
   text-decoration: none;
   color: inherit;
   
   &:hover {
     transform: translateY(-5px);
-    box-shadow: $shadow-md;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   }
 }
 
@@ -229,14 +236,14 @@
   align-items: center;
   width: 60px;
   height: 60px;
-  background-color: rgba($primary-color, 0.15);
+  background-color: rgba(74, 142, 218, 0.15);
   border-radius: 50%;
   margin-bottom: 1rem;
 }
 
 .featureIcon {
   font-size: 1.5rem;
-  color: $primary-color;
+  color: #4a8eda;
 }
 
 .featureTitle {
@@ -244,12 +251,227 @@
   font-weight: 600;
   margin-bottom: 0.5rem;
   text-align: center;
-  color: $text-white;
+  color: #333333;
 }
 
 .featureDescription {
   font-size: 0.9rem;
-  color: $text-light;
+  color: #666666;
   text-align: center;
   margin: 0;
+}
+
+// Dashboard Header
+.dashboardHeader {
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.welcomeMessage {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  color: #000000;
+}
+
+.dateDisplay {
+  font-size: 1rem;
+  color: #000000;
+}
+
+// Quick Access Section
+.quickAccessSection {
+  margin-bottom: 2rem;
+}
+
+.sectionTitle {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: #000000;
+}
+
+.quickAccessGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1rem;
+}
+
+.quickAccessCard {
+  display: flex;
+  align-items: center;
+  padding: 1.25rem;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s, box-shadow 0.2s;
+  text-decoration: none;
+  color: #000000;
+  
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+}
+
+.quickAccessIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  background-color: var(--primary-light);
+  color: var(--primary);
+  border-radius: 12px;
+  margin-right: 1rem;
+  font-size: 1.5rem;
+}
+
+.quickAccessContent {
+  flex: 1;
+  
+  h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+    color: #000000;
+  }
+  
+  p {
+    font-size: 0.9rem;
+    color: #000000;
+    margin: 0;
+  }
+}
+
+// Active Goals Section
+.activeGoalsSection {
+  margin-bottom: 2rem;
+}
+
+.viewAllLink {
+  display: flex;
+  align-items: center;
+  font-size: 0.9rem;
+  color: #4a8eda;
+  text-decoration: none;
+  
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.viewAllIcon {
+  margin-left: 0.5rem;
+  font-size: 0.8rem;
+}
+
+.goalsList {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1rem;
+}
+
+.goalCard {
+  background-color: #ffffff;
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.goalHeader {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.goalCategory {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #4a8eda;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.goalStatus {
+  font-size: 0.8rem;
+  font-weight: 500;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  background-color: rgba(74, 142, 218, 0.15);
+  color: #4a8eda;
+}
+
+.goalTitle {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #333333;
+}
+
+.goalDescription {
+  font-size: 0.9rem;
+  color: #666666;
+  margin-bottom: 1rem;
+}
+
+.goalProgress {
+  margin-bottom: 1rem;
+}
+
+.progressBar {
+  height: 8px;
+  background-color: #f5f7fa;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 0.5rem;
+}
+
+.progressFill {
+  height: 100%;
+  background-color: #4a8eda;
+  border-radius: 4px;
+}
+
+.progressText {
+  font-size: 0.85rem;
+  color: #666666;
+  text-align: right;
+}
+
+.goalDates {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  color: #666666;
+}
+
+.goalDate {
+  span {
+    font-weight: 600;
+  }
+}
+
+.loadingState, .errorState, .emptyState {
+  padding: 2rem;
+  text-align: center;
+  background-color: #ffffff;
+  border-radius: 8px;
+  color: #666666;
+}
+
+.emptyState {
+  p {
+    margin-bottom: 1rem;
+  }
+}
+
+// Rename existing section
+.nutritionSummarySection {
+  margin-bottom: 2rem;
+}
+
+.moreFeaturesSection {
+  margin-top: 2rem;
+  padding: 0 1rem;
 } 
