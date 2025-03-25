@@ -315,7 +315,7 @@ export default function HealthTrackingDashboard() {
   };
 
   // handleSubmit fonksiyonunu güncelle
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
     
@@ -323,11 +323,12 @@ export default function HealthTrackingDashboard() {
       const userId = user.id;
       let url = '';
       let dataToSend = {};
-      const method = editingEntryId ? 'PUT' : 'POST';
+      const method = editingEntryId ? 'PATCH' : 'POST'; // PUT yerine PATCH kullanıyoruz
       
+      // Prepare the correct endpoint based on the active tab
       if (activeTab === 'bodyMeasurements') {
         url = editingEntryId 
-          ? `/api/health/body-measurements/${editingEntryId}` 
+          ? `/api/health/body-measurements/${editingEntryId}`
           : '/api/health/body-measurements';
         dataToSend = {
           user_id: userId,
@@ -339,10 +340,8 @@ export default function HealthTrackingDashboard() {
         };
       } else if (activeTab === 'vitalSigns') {
         url = editingEntryId 
-          ? `/api/health/vital-signs/${editingEntryId}` 
+          ? `/api/health/vital-signs/${editingEntryId}`
           : '/api/health/vital-signs';
-        
-        // Form verilerini backend API field isimleriyle eşleştir
         dataToSend = {
           user_id: userId,
           date: formData.date,
@@ -353,7 +352,7 @@ export default function HealthTrackingDashboard() {
         };
       } else if (activeTab === 'bloodWork') {
         url = editingEntryId 
-          ? `/api/health/blood-work/${editingEntryId}` 
+          ? `/api/health/blood-work/${editingEntryId}`
           : '/api/health/blood-work';
         dataToSend = {
           user_id: userId,
@@ -366,7 +365,7 @@ export default function HealthTrackingDashboard() {
         };
       } else if (activeTab === 'sleepPatterns') {
         url = editingEntryId 
-          ? `/api/health/sleep-patterns/${editingEntryId}` 
+          ? `/api/health/sleep-patterns/${editingEntryId}`
           : '/api/health/sleep-patterns';
         dataToSend = {
           user_id: userId,
@@ -390,11 +389,34 @@ export default function HealthTrackingDashboard() {
       if (!response.ok) {
         const errorText = await response.text();
         console.error('Server response:', response.status, errorText);
-        throw new Error(`Error ${editingEntryId ? 'updating' : 'submitting'} health data: ${response.status} ${response.statusText}`);
+        
+        // Eğer 404 hatası alınıyorsa, muhtemelen kayıt bulunamadı - POST ile oluşturalım
+        if (response.status === 404 && editingEntryId) {
+          console.log('Resource not found, trying to create a new entry instead...');
+          
+          // POST isteği ile yeni kayıt oluşturmayı deneyelim
+          const createResponse = await fetch(url.split('/').slice(0, -1).join('/'), {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(dataToSend)
+          });
+          
+          if (!createResponse.ok) {
+            const createErrorText = await createResponse.text();
+            console.error('Create attempt failed:', createResponse.status, createErrorText);
+            throw new Error(`Error creating health data: ${createResponse.status} ${createResponse.statusText}`);
+          }
+          
+          console.log('Successfully created new entry instead of updating');
+          const result = await createResponse.json();
+          console.log('Creation successful:', result);
+        } else {
+          throw new Error(`Error ${editingEntryId ? 'updating' : 'submitting'} health data: ${response.status} ${response.statusText}`);
+        }
+      } else {
+        const result = await response.json();
+        console.log(`${editingEntryId ? 'Update' : 'Submission'} successful:`, result);
       }
-      
-      const result = await response.json();
-      console.log(`${editingEntryId ? 'Update' : 'Submission'} successful:`, result);
       
       // Refresh data after successful submission
       const fetchData = async () => {
