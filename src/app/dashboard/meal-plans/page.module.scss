@@ -130,12 +130,37 @@
 }
 
 .dayHeader {
-  background-color: $primary-color;
-  color: white;
+  background-color: #f0f0f0;
   padding: 0.75rem;
-  text-align: center;
   font-size: 1.2rem;
   font-weight: 600;
+  border-bottom: 2px solid #e0e0e0;
+  text-align: center;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  
+  h3 {
+    margin: 0;
+    flex-grow: 1;
+  }
+}
+
+.clearDayButton {
+  background-color: transparent;
+  border: none;
+  color: #999;
+  cursor: pointer;
+  padding: 5px;
+  border-radius: 4px;
+  transition: all 0.2s;
+  
+  &:hover {
+    color: #d9534f;
+    background-color: rgba(217, 83, 79, 0.1);
+  }
 }
 
 .mealTimeSlot {
@@ -288,6 +313,48 @@
   justify-content: center;
   background-color: rgba(255, 255, 255, 0.8);
   z-index: 2;
+}
+
+// Add styles for the authMessage
+.authMessage {
+  text-align: center;
+  padding: 2rem;
+  margin: 2rem auto;
+  max-width: 600px;
+  background-color: #f5f5f5;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  
+  h2 {
+    color: #333;
+    margin-bottom: 1rem;
+  }
+  
+  p {
+    color: #666;
+    line-height: 1.5;
+    margin-bottom: 1.5rem;
+  }
+}
+
+.devLoginButton {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: background-color 0.2s;
+  margin-top: 1rem;
+  
+  &:hover {
+    background-color: #0056b3;
+  }
 }
 
 // Responsive adjustments

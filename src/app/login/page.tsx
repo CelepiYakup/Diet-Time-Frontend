@@ -1,141 +1,94 @@
 'use client';
 
-import { useState, FormEvent } from 'react';
+import React, { useState } from 'react';
+import { useAuth } from '../context/AuthContext';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import styles from './page.module.scss';
-import { userApi, LoginInput } from '../services/api';
-import { useAuth } from '../context/AuthContext';
-import { useToast } from '../context/ToastContext';
+import { toast } from 'react-hot-toast';
+import styles from './login.module.scss';
 
-export default function Login() {
+export default function LoginPage() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [formError, setFormError] = useState('');
+  const { login, isLoading, isAuthenticated } = useAuth();
   const router = useRouter();
-  const { login } = useAuth();
-  const { showSuccess, showError } = useToast();
-  const [formData, setFormData] = useState<LoginInput>({
-    email: '',
-    password: '',
-  });
-  const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
+  // Redirect if already authenticated
+  React.useEffect(() => {
+    if (isAuthenticated) {
+      router.push('/dashboard');
+    }
+  }, [isAuthenticated, router]);
 
-  const handleSubmit = async (e: FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
+    setFormError('');
+
+    // Validate form
+    if (!email || !password) {
+      setFormError('Email and password are required');
+      return;
+    }
 
     try {
-      // Validate form
-      if (!formData.email || !formData.password) {
-        showError('All fields are required');
-        setIsLoading(false);
-        return;
-      }
-
-      // Login user
-      const response = await userApi.loginUser(formData);
-      
-      // Set user in context
-      login(response.user);
-      
-      // Show success message
-      showSuccess('Login successful!');
-      
-      // Redirect to dashboard
-      router.push('/dashboard');
+      await login({ email, password });
+      // Auth context will handle success and redirection
     } catch (error) {
-      if (error instanceof Error) {
-        showError(error.message);
-      } else {
-        showError('An unexpected error occurred');
-      }
-    } finally {
-      setIsLoading(false);
+      console.error('Login error:', error);
+      setFormError('Invalid email or password');
     }
   };
 
   return (
-    <div className={styles.loginPage}>
-      <div className={styles.loginContainer}>
-        <div className={styles.loginCard}>
-          <div className={styles.logoContainer}>
-            <div className={styles.logo}>
-              <span className={styles.logoText}>Diet Time</span>
-            </div>
+    <div className={styles.loginContainer}>
+      <div className={styles.loginCard}>
+        <h1 className={styles.title}>Log In</h1>
+        
+        {formError && (
+          <div className={styles.errorMessage}>
+            {formError}
           </div>
-          
-          <h1 className={styles.title}>Welcome Back</h1>
-          <p className={styles.subtitle}>Sign in to continue to Diet Time</p>
-          
-          <form className={styles.form} onSubmit={handleSubmit}>
-            <div className={styles.formGroup}>
-              <label htmlFor="email" className={styles.label}>
-                Email
-              </label>
-              <div className={styles.inputWrapper}>
-                <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  className={styles.input}
-                  value={formData.email}
-                  onChange={handleChange}
-                  placeholder="Enter your email"
-                  required
-                />
-              </div>
-            </div>
-            
-            <div className={styles.formGroup}>
-              <div className={styles.labelRow}>
-                <label htmlFor="password" className={styles.label}>
-                  Password
-                </label>
-                <Link href="/forgot-password" className={styles.forgotPassword}>
-                  Forgot password?
-                </Link>
-              </div>
-              <div className={styles.inputWrapper}>
-                <input
-                  type="password"
-                  id="password"
-                  name="password"
-                  className={styles.input}
-                  value={formData.password}
-                  onChange={handleChange}
-                  placeholder="Enter your password"
-                  required
-                />
-              </div>
-            </div>
-            
-            <button
-              type="submit"
-              className={styles.submitButton}
+        )}
+        
+        <form onSubmit={handleSubmit} className={styles.loginForm}>
+          <div className={styles.formGroup}>
+            <label htmlFor="email">Email</label>
+            <input
+              type="email"
+              id="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Enter your email"
+              className={styles.input}
               disabled={isLoading}
-            >
-              {isLoading ? (
-                <span className={styles.loadingSpinner}></span>
-              ) : (
-                'Sign In'
-              )}
-            </button>
-          </form>
-          
-          <div className={styles.footer}>
-            <p>
-              Don&apos;t have an account?{' '}
-              <Link href="/register" className={styles.link}>
-                Sign Up
-              </Link>
-            </p>
+            />
           </div>
+          
+          <div className={styles.formGroup}>
+            <label htmlFor="password">Password</label>
+            <input
+              type="password"
+              id="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Enter your password"
+              className={styles.input}
+              disabled={isLoading}
+            />
+          </div>
+          
+          <button 
+            type="submit" 
+            className={styles.loginButton}
+            disabled={isLoading}
+          >
+            {isLoading ? 'Logging in...' : 'Log In'}
+          </button>
+        </form>
+        
+        <div className={styles.registerLink}>
+          Don't have an account? <Link href="/register">Register</Link>
         </div>
       </div>
     </div>

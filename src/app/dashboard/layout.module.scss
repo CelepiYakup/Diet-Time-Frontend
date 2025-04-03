@@ -1,0 +1,17 @@
+@import '../styles/variables.scss';
+
+.dashboardLayout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: $bg-darker;
+}
+
+.main {
+  flex: 1;
+  padding: 1rem;
+  
+  @media (min-width: 768px) {
+    padding: 2rem;
+  }
+} 

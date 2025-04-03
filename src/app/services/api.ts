@@ -1,3 +1,5 @@
+import { getAuthToken } from '../context/AuthContext';
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
 export interface User {
@@ -62,6 +64,25 @@ export interface GoalInput {
   deadline: string;
 }
 
+// MealPlan interfaces
+export interface MealPlan {
+  id: number;
+  user_id: number;
+  day: string;
+  meal_time: string;
+  meal_id: number;
+  created_at: string;
+  updated_at: string;
+  meal?: Meal; // Optional meal details
+}
+
+export interface MealPlanInput {
+  user_id: number;
+  day: string;
+  meal_time: string;
+  meal_id: number;
+}
+
 // User API calls
 export const userApi = {
   // Get all users
@@ -116,29 +137,22 @@ export const userApi = {
   },
 
   // Login user
-  loginUser: async (loginData: LoginInput): Promise<{ message: string; user: User }> => {
+  loginUser: async (loginData: LoginInput): Promise<{ message: string; user: User & { token: string } }> => {
     try {
-      // For demo purposes, we'll simulate a login since we don't have a real login endpoint yet
-      // In a real app, you would make a fetch request to your login endpoint
+      const response = await fetch(`${API_URL}/users/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(loginData),
+      });
       
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      // Get user by email (this is just for demo)
-      const users = await userApi.getAllUsers();
-      const user = users.find(u => u.email === loginData.email);
-      
-      if (!user) {
-        throw new Error('User not found');
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to login');
       }
       
-      // In a real app, you would verify the password on the server
-      // Here we're just simulating a successful login
-      
-      return {
-        message: 'Login successful',
-        user
-      };
+      return await response.json();
     } catch (error) {
       console.error('Error logging in:', error);
       throw error;
@@ -407,4 +421,132 @@ export const goalApi = {
       throw error;
     }
   },
+};
+
+// Meal Plan API calls
+export const mealPlanApi = {
+  // Get all meal plans for a user
+  getUserMealPlans: async (userId: number): Promise<MealPlan[]> => {
+    try {
+      // Get token using helper function
+      const token = getAuthToken();
+      
+      const response = await fetch(`${API_URL}/meal-plans/user/${userId}`, {
+        headers: {
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        }
+      });
+      if (!response.ok) {
+        throw new Error('Failed to fetch meal plans');
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching meal plans:', error);
+      throw error;
+    }
+  },
+
+  // Create a new meal plan entry
+  createMealPlan: async (mealPlanData: MealPlanInput): Promise<{ message: string; mealPlan: MealPlan }> => {
+    try {
+      // Get token using helper function
+      const token = getAuthToken();
+      
+      const response = await fetch(`${API_URL}/meal-plans`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        },
+        body: JSON.stringify(mealPlanData),
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to create meal plan');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Error creating meal plan:', error);
+      throw error;
+    }
+  },
+
+  // Update a meal plan entry
+  updateMealPlan: async (id: number, mealPlanData: Partial<MealPlanInput>): Promise<{ message: string; mealPlan: MealPlan }> => {
+    try {
+      // Get token using helper function
+      const token = getAuthToken();
+      
+      const response = await fetch(`${API_URL}/meal-plans/${id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        },
+        body: JSON.stringify(mealPlanData),
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to update meal plan');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Error updating meal plan:', error);
+      throw error;
+    }
+  },
+
+  // Delete a meal plan entry
+  deleteMealPlan: async (id: number): Promise<{ message: string }> => {
+    try {
+      // Get token using helper function
+      const token = getAuthToken();
+      
+      const response = await fetch(`${API_URL}/meal-plans/${id}`, {
+        method: 'DELETE',
+        headers: {
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        }
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to delete meal plan');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Error deleting meal plan:', error);
+      throw error;
+    }
+  },
+  
+  // Delete all meal plans for a specific day
+  deleteMealPlansForDay: async (userId: number, day: string): Promise<{ message: string }> => {
+    try {
+      // Get token using helper function
+      const token = getAuthToken();
+      
+      const response = await fetch(`${API_URL}/meal-plans/user/${userId}/day/${day}`, {
+        method: 'DELETE',
+        headers: {
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        }
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to delete meal plans for day');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Error deleting meal plans for day:', error);
+      throw error;
+    }
+  }
 }; 
