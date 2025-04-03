@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { FaPlus, FaBullseye, FaWeight, FaHeartbeat, FaUtensils, FaRunning, FaEdit, FaTrash } from 'react-icons/fa';
 import styles from './page.module.scss';
 import { useAuth } from '../../context/AuthContext';
-import { goalApi, Goal } from '../../services/api';
+import { goalApi, Goal, GoalInput } from '../../services/api';
 import ProgressBar from '@/app/components/Progress/ProgressBar';
 import LoadingIndicator from '@/app/components/LoadingIndicator';
 
@@ -21,14 +21,11 @@ export default function GoalSettingDashboard() {
   const [editingGoal, setEditingGoal] = useState<Goal | null>(null);
   
   const [formData, setFormData] = useState({
-    title: '',
-    description: '',
+    category: 'weight',
     target_value: '',
     current_value: '',
     unit: '',
-    category: 'weight',
-    start_date: new Date().toISOString().split('T')[0],
-    target_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    deadline: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
   });
 
   const fetchGoals = useCallback(async () => {
@@ -70,19 +67,33 @@ export default function GoalSettingDashboard() {
 
     try {
       setLoading(true);
+      setError(null);
       
+      // Validate required fields
+      if (!formData.category || !formData.target_value || !formData.current_value || !formData.unit || !formData.deadline) {
+        setError('All fields are required');
+        return;
+      }
+
+      // Validate numeric fields
+      if (isNaN(parseFloat(formData.target_value))) {
+        setError('Target value must be a valid number');
+        return;
+      }
+
+      if (isNaN(parseFloat(formData.current_value))) {
+        setError('Current value must be a valid number');
+        return;
+      }
+
       // Prepare form data with proper type conversions
-      const goalData = {
-        title: formData.title,
-        description: formData.description,
-        target_value: formData.target_value ? parseFloat(formData.target_value) : undefined,
-        current_value: formData.current_value ? parseFloat(formData.current_value) : undefined,
-        unit: formData.unit,
+      const goalData: GoalInput = {
+        user_id: user.id,
         category: formData.category,
-        start_date: formData.start_date,
-        target_date: formData.target_date,
-        status: 'in_progress' as const,
-        user_id: user.id
+        target_value: parseFloat(formData.target_value),
+        current_value: parseFloat(formData.current_value),
+        unit: formData.unit.trim(),
+        deadline: formData.deadline
       };
       
       if (isEditing && editingGoal) {
@@ -93,22 +104,19 @@ export default function GoalSettingDashboard() {
       
       // Reset form and refresh data
       setFormData({
-        title: '',
-        description: '',
+        category: 'weight',
         target_value: '',
         current_value: '',
         unit: '',
-        category: 'weight',
-        start_date: new Date().toISOString().split('T')[0],
-        target_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        deadline: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
       });
       setIsEditing(false);
       setEditingGoal(null);
       setShowForm(false);
-      fetchGoals();
+      await fetchGoals();
     } catch (err) {
       console.error('Failed to save goal:', err);
-      setError('Failed to save goal. Please try again.');
+      setError(err instanceof Error ? err.message : 'Failed to save goal. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -133,7 +141,7 @@ export default function GoalSettingDashboard() {
 
   const handleUpdateGoalStatus = async (goalId: number, status: 'in_progress' | 'completed' | 'failed') => {
     try {
-      await goalApi.updateGoal(goalId, { status });
+      await goalApi.updateGoal(goalId, {});
       fetchGoals();
     } catch (err) {
       console.error('Error updating goal status:', err);
@@ -143,14 +151,11 @@ export default function GoalSettingDashboard() {
 
   const handleEditGoal = (goal: Goal) => {
     setFormData({
-      title: goal.title,
-      description: goal.description || '',
-      target_value: goal.target_value ? goal.target_value.toString() : '',
-      current_value: goal.current_value ? goal.current_value.toString() : '',
-      unit: goal.unit || '',
       category: goal.category,
-      start_date: goal.start_date,
-      target_date: goal.target_date,
+      target_value: goal.target_value.toString(),
+      current_value: goal.current_value.toString(),
+      unit: goal.unit,
+      deadline: goal.deadline,
     });
     setIsEditing(true);
     setEditingGoal(goal);
@@ -180,72 +185,7 @@ export default function GoalSettingDashboard() {
       <h2 className={styles.formTitle}>{isEditing ? 'Edit Goal' : 'Create New Goal'}</h2>
       <form onSubmit={handleSubmit} className={styles.goalForm}>
         <div className={styles.formGroup}>
-          <label htmlFor="title">Goal Title *</label>
-          <input
-            type="text"
-            id="title"
-            name="title"
-            value={formData.title}
-            onChange={handleInputChange}
-            required
-            placeholder="e.g., Lose 10 pounds"
-          />
-        </div>
-
-        <div className={styles.formGroup}>
-          <label htmlFor="description">Description</label>
-          <textarea
-            id="description"
-            name="description"
-            value={formData.description}
-            onChange={handleInputChange}
-            placeholder="Describe your goal in detail"
-            rows={3}
-          />
-        </div>
-
-        <div className={styles.formRow}>
-          <div className={styles.formGroup}>
-            <label htmlFor="current_value">Current Value</label>
-            <input
-              type="number"
-              id="current_value"
-              name="current_value"
-              value={formData.current_value}
-              onChange={handleInputChange}
-              placeholder="e.g., 170"
-              step="0.01"
-            />
-          </div>
-
-          <div className={styles.formGroup}>
-            <label htmlFor="target_value">Target Value</label>
-            <input
-              type="number"
-              id="target_value"
-              name="target_value"
-              value={formData.target_value}
-              onChange={handleInputChange}
-              placeholder="e.g., 160"
-              step="0.01"
-            />
-          </div>
-
-          <div className={styles.formGroup}>
-            <label htmlFor="unit">Unit</label>
-            <input
-              type="text"
-              id="unit"
-              name="unit"
-              value={formData.unit}
-              onChange={handleInputChange}
-              placeholder="e.g., lbs, kg, steps"
-            />
-          </div>
-        </div>
-
-        <div className={styles.formGroup}>
-          <label htmlFor="category">Category *</label>
+          <label htmlFor="category">Category</label>
           <select
             id="category"
             name="category"
@@ -261,48 +201,60 @@ export default function GoalSettingDashboard() {
           </select>
         </div>
 
-        <div className={styles.formRow}>
-          <div className={styles.formGroup}>
-            <label htmlFor="start_date">Start Date *</label>
-            <input
-              type="date"
-              id="start_date"
-              name="start_date"
-              value={formData.start_date}
-              onChange={handleInputChange}
-              required
-            />
-          </div>
+        <div className={styles.formGroup}>
+          <label htmlFor="target_value">Target Value</label>
+          <input
+            type="number"
+            id="target_value"
+            name="target_value"
+            value={formData.target_value}
+            onChange={handleInputChange}
+            required
+            step="0.1"
+          />
+        </div>
 
-          <div className={styles.formGroup}>
-            <label htmlFor="target_date">Target Date *</label>
-            <input
-              type="date"
-              id="target_date"
-              name="target_date"
-              value={formData.target_date}
-              onChange={handleInputChange}
-              required
-            />
-          </div>
+        <div className={styles.formGroup}>
+          <label htmlFor="current_value">Current Value</label>
+          <input
+            type="number"
+            id="current_value"
+            name="current_value"
+            value={formData.current_value}
+            onChange={handleInputChange}
+            required
+            step="0.1"
+          />
+        </div>
+
+        <div className={styles.formGroup}>
+          <label htmlFor="unit">Unit</label>
+          <input
+            type="text"
+            id="unit"
+            name="unit"
+            value={formData.unit}
+            onChange={handleInputChange}
+            required
+            placeholder="e.g., kg, lbs, minutes"
+          />
+        </div>
+
+        <div className={styles.formGroup}>
+          <label htmlFor="deadline">Deadline</label>
+          <input
+            type="date"
+            id="deadline"
+            name="deadline"
+            value={formData.deadline}
+            onChange={handleInputChange}
+            required
+            min={new Date().toISOString().split('T')[0]}
+          />
         </div>
 
         <div className={styles.formActions}>
-          <button type="button" className={styles.cancelButton} onClick={() => {
-            setShowForm(false);
-            setIsEditing(false);
-            setEditingGoal(null);
-            setFormData({
-              title: '',
-              description: '',
-              target_value: '',
-              current_value: '',
-              unit: '',
-              category: 'weight',
-              start_date: new Date().toISOString().split('T')[0],
-              target_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-            });
-          }}>
+          <button type="button" onClick={() => setShowForm(false)} className={styles.cancelButton}>
             Cancel
           </button>
           <button type="submit" className={styles.submitButton}>
@@ -310,6 +262,40 @@ export default function GoalSettingDashboard() {
           </button>
         </div>
       </form>
+    </div>
+  );
+
+  const renderGoalCard = (goal: Goal) => (
+    <div key={goal.id} className={styles.goalCard}>
+      <div className={styles.goalHeader}>
+        <div className={styles.goalCategory}>
+          {categoryIcons[goal.category]}
+          <span className={styles.categoryName}>{goal.category}</span>
+        </div>
+        <div className={styles.goalActions}>
+          <button onClick={() => handleEditGoal(goal)} className={styles.editButton}>
+            <FaEdit />
+          </button>
+          <button onClick={() => handleDeleteGoal(goal.id)} className={styles.deleteButton}>
+            <FaTrash />
+          </button>
+        </div>
+      </div>
+      
+      <div className={styles.goalProgress}>
+        <ProgressBar
+          currentValue={goal.current_value}
+          maxValue={goal.target_value}
+          unit={goal.unit}
+        />
+      </div>
+      
+      <div className={styles.goalDates}>
+        <div className={styles.dateItem}>
+          <span className={styles.dateLabel}>Deadline:</span>
+          <span className={styles.dateValue}>{new Date(goal.deadline).toLocaleDateString()}</span>
+        </div>
+      </div>
     </div>
   );
 
@@ -383,78 +369,7 @@ export default function GoalSettingDashboard() {
           
           {displayedGoals.length > 0 ? (
             <div className={styles.goalsList}>
-              {displayedGoals.map((goal) => (
-                <div key={goal.id} className={`${styles.goalCard} ${styles[goal.status]}`}>
-                  <div className={styles.goalHeader}>
-                    <div className={styles.goalCategoryIcon}>
-                      {categoryIcons[goal.category] || <FaBullseye />}
-                    </div>
-                    <div className={styles.goalCategory}>{goal.category}</div>
-                    <div className={styles.goalStatus}>
-                      {formatStatus(goal.status)}
-                    </div>
-                  </div>
-                  <h3 className={styles.goalTitle}>{goal.title}</h3>
-                  {goal.description && <p className={styles.goalDescription}>{goal.description}</p>}
-                  
-                  {goal.target_value && goal.current_value && (
-                    <div className={styles.goalProgress}>
-                      <ProgressBar 
-                        currentValue={goal.current_value}
-                        maxValue={goal.target_value}
-                        unit={goal.unit}
-                        variant={
-                          goal.status === 'completed' 
-                            ? 'success' 
-                            : goal.status === 'failed' 
-                              ? 'danger' 
-                              : undefined
-                        }
-                      />
-                    </div>
-                  )}
-                  
-                  <div className={styles.goalDates}>
-                    <div className={styles.goalDate}>
-                      <span>Start:</span> {new Date(goal.start_date).toLocaleDateString()}
-                    </div>
-                    <div className={styles.goalDate}>
-                      <span>Target:</span> {new Date(goal.target_date).toLocaleDateString()}
-                    </div>
-                  </div>
-                  
-                  <div className={styles.goalActions}>
-                    {goal.status === 'in_progress' && (
-                      <>
-                        <button 
-                          className={styles.completeButton}
-                          onClick={() => handleUpdateGoalStatus(goal.id, 'completed')}
-                        >
-                          Mark Complete
-                        </button>
-                        <button 
-                          className={styles.failButton}
-                          onClick={() => handleUpdateGoalStatus(goal.id, 'failed')}
-                        >
-                          Mark Failed
-                        </button>
-                      </>
-                    )}
-                    <button 
-                      className={styles.editButton}
-                      onClick={() => handleEditGoal(goal)}
-                    >
-                      <FaEdit />
-                    </button>
-                    <button 
-                      className={styles.deleteButton}
-                      onClick={() => handleDeleteGoal(goal.id)}
-                    >
-                      <FaTrash />
-                    </button>
-                  </div>
-                </div>
-              ))}
+              {displayedGoals.map((goal) => renderGoalCard(goal))}
             </div>
           ) : (
             <div className={styles.emptyState}>

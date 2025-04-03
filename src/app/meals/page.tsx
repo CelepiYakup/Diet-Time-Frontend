@@ -57,7 +57,7 @@ export default function MealTracking() {
     fetchMeals();
   }, [isAuthenticated, router, user]);
 
-  const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFilters((prev) => ({
       ...prev,

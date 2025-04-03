@@ -423,4 +423,27 @@
     color: #666;
     max-width: 600px;
   }
+}
+
+.sidebarToggle {
+  padding: 10px 20px;
+  background: $primary-color;
+  color: white;
+  border: none;
+  border-radius: $border-radius-md;
+  cursor: pointer;
+  margin-top: 10px;
+  font-weight: 500;
+  transition: background-color 0.2s;
+  
+  &:hover {
+    background-color: darken($primary-color, 10%);
+  }
+}
+
+.noData {
+  text-align: center;
+  padding: 1.5rem;
+  color: #777;
+  font-style: italic;
 } 

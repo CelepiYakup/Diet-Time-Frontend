@@ -44,17 +44,22 @@ export interface MealInput {
 export interface Goal {
   id: number;
   user_id: number;
-  title: string;
-  description?: string;
-  target_value?: number;
-  current_value?: number;
-  unit?: string;
   category: string;
-  start_date: string;
-  target_date: string;
-  status: 'in_progress' | 'completed' | 'failed';
+  target_value: number;
+  current_value: number;
+  unit: string;
+  deadline: string;
   created_at: string;
   updated_at: string;
+}
+
+export interface GoalInput {
+  user_id: number;
+  category: string;
+  target_value: number;
+  current_value: number;
+  unit: string;
+  deadline: string;
 }
 
 // User API calls
@@ -282,93 +287,124 @@ export const mealApi = {
   },
 };
 
+// Goal API calls
 export const goalApi = {
-  // Create a new goal
-  createGoal: async (goalData: Omit<Goal, 'id' | 'created_at' | 'updated_at'>): Promise<Goal> => {
-    const response = await fetch('/api/goals/goals', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(goalData),
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to create goal');
-    }
-
-    return response.json();
-  },
-
   // Get all goals for a user
   getUserGoals: async (userId: number): Promise<Goal[]> => {
-    const response = await fetch(`/api/goals/goals/user/${userId}`);
-
-    if (!response.ok) {
-      throw new Error('Failed to fetch user goals');
+    try {
+      const response = await fetch(`${API_URL}/goals/user/${userId}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch goals');
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching goals:', error);
+      throw error;
     }
-
-    return response.json();
   },
 
-  // Get a specific goal by ID
-  getGoalById: async (goalId: number): Promise<Goal> => {
-    const response = await fetch(`/api/goals/goals/${goalId}`);
-
-    if (!response.ok) {
-      throw new Error('Failed to fetch goal');
+  // Get goal by ID
+  getGoalById: async (id: number): Promise<Goal> => {
+    try {
+      const response = await fetch(`${API_URL}/goals/${id}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch goal');
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching goal:', error);
+      throw error;
     }
-
-    return response.json();
   },
 
-  // Update a goal
-  updateGoal: async (goalId: number, goalData: Partial<Omit<Goal, 'id' | 'created_at' | 'updated_at'>>): Promise<Goal> => {
-    const response = await fetch(`/api/goals/goals/${goalId}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(goalData),
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to update goal');
+  // Create a new goal
+  createGoal: async (goalData: GoalInput): Promise<Goal> => {
+    try {
+      const response = await fetch(`${API_URL}/goals`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(goalData),
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to create goal');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Error creating goal:', error);
+      throw error;
     }
-
-    return response.json();
   },
 
-  // Delete a goal
-  deleteGoal: async (goalId: number): Promise<void> => {
-    const response = await fetch(`/api/goals/goals/${goalId}`, {
-      method: 'DELETE',
-    });
+  // Update goal
+  updateGoal: async (id: number, goalData: Partial<GoalInput>): Promise<Goal> => {
+    try {
+      const response = await fetch(`${API_URL}/goals/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(goalData),
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to update goal');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Error updating goal:', error);
+      throw error;
+    }
+  },
 
-    if (!response.ok) {
-      throw new Error('Failed to delete goal');
+  // Delete goal
+  deleteGoal: async (id: number): Promise<void> => {
+    try {
+      const response = await fetch(`${API_URL}/goals/${id}`, {
+        method: 'DELETE',
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to delete goal');
+      }
+    } catch (error) {
+      console.error('Error deleting goal:', error);
+      throw error;
     }
   },
 
   // Get goals by category for a user
   getGoalsByCategory: async (userId: number, category: string): Promise<Goal[]> => {
-    const response = await fetch(`/api/goals/goals/user/${userId}/category/${category}`);
-
-    if (!response.ok) {
-      throw new Error('Failed to fetch goals by category');
+    try {
+      const response = await fetch(`${API_URL}/goals/user/${userId}/category/${category}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch goals by category');
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching goals by category:', error);
+      throw error;
     }
-
-    return response.json();
   },
 
   // Get active goals for a user
   getActiveGoals: async (userId: number): Promise<Goal[]> => {
-    const response = await fetch(`/api/goals/goals/user/${userId}/active`);
-
-    if (!response.ok) {
-      throw new Error('Failed to fetch active goals');
+    try {
+      const response = await fetch(`${API_URL}/goals/user/${userId}/active`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch active goals');
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching active goals:', error);
+      throw error;
     }
-
-    return response.json();
   },
 }; 
