@@ -22,8 +22,8 @@ export default function AddMeal() {
   const { isAuthenticated, user } = useAuth();
   const [formData, setFormData] = useState<MealFormData>({
     name: '',
-    date: new Date().toISOString().split('T')[0], // Current date in YYYY-MM-DD format
-    time: new Date().toTimeString().slice(0, 5), // Current time in HH:MM format
+    date: new Date().toISOString().split('T')[0], 
+    time: new Date().toTimeString().slice(0, 5), 
     calories: '',
     protein: '',
     carbs: '',
@@ -33,7 +33,7 @@ export default function AddMeal() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   useEffect(() => {
-    // Redirect if not authenticated
+
     if (!isAuthenticated) {
       router.push('/login');
     }
@@ -53,7 +53,7 @@ export default function AddMeal() {
     setIsLoading(true);
 
     try {
-      // Validate form
+
       if (!formData.name || !formData.date || !formData.time || !formData.calories) {
         setError('Name, date, time, and calories are required');
         setIsLoading(false);
@@ -66,7 +66,7 @@ export default function AddMeal() {
         return;
       }
 
-      // Create meal data for API
+
       const mealData: MealInput = {
         name: formData.name,
         calories: parseInt(formData.calories),
@@ -74,7 +74,7 @@ export default function AddMeal() {
         meal_time: formData.time,
       };
 
-      // Add optional fields if provided
+ 
       if (formData.protein) {
         mealData.protein = parseInt(formData.protein);
       }
@@ -85,10 +85,10 @@ export default function AddMeal() {
         mealData.fat = parseInt(formData.fat);
       }
 
-      // Create meal
+
       await mealApi.createMeal(user.id, mealData);
       
-      // Redirect to dashboard
+
       router.push('/dashboard');
     } catch (error) {
       if (error instanceof Error) {
@@ -102,7 +102,7 @@ export default function AddMeal() {
   };
 
   if (!isAuthenticated) {
-    return null; // Don't render anything while redirecting
+    return null; 
   }
 
   return (

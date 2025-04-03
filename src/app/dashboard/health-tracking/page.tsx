@@ -14,9 +14,9 @@ import {
   Tooltip,
   Legend
 } from 'chart.js';
-import Sidebar from '../../components/Sidebar/Sidebar';
-import { useAuth } from '../../context/AuthContext';
-import LoadingIndicator from '../../components/LoadingIndicator/LoadingIndicator';
+import Sidebar from '@/app/components/Sidebar';
+import { useAuth } from '@/app/context/AuthContext';
+import LoadingIndicator from '@/app/components/LoadingIndicator';
 
 // Register ChartJS components
 ChartJS.register(
@@ -1105,7 +1105,7 @@ export default function HealthTrackingDashboard() {
     <div className={styles.pageContainer}>
       {isSidebarOpen && (
         <Sidebar 
-          isOpen={true} 
+          isOpen={true}
           isCollapsed={false}
           onClose={toggleSidebar} 
         />

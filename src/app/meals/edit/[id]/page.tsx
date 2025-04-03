@@ -35,7 +35,7 @@ export default function EditMeal({ params }: { params: { id: string } }) {
   const [meal, setMeal] = useState<Meal | null>(null);
 
   useEffect(() => {
-    // Redirect if not authenticated
+
     if (!isAuthenticated) {
       router.push('/login');
       return;
@@ -54,7 +54,7 @@ export default function EditMeal({ params }: { params: { id: string } }) {
         const fetchedMeal = await mealApi.getMealById(mealId);
         setMeal(fetchedMeal);
         
-        // Set form data
+
         setFormData({
           name: fetchedMeal.name,
           date: fetchedMeal.meal_date,
@@ -89,7 +89,7 @@ export default function EditMeal({ params }: { params: { id: string } }) {
     setIsSaving(true);
 
     try {
-      // Validate form
+
       if (!formData.name || !formData.date || !formData.time || !formData.calories) {
         setError('Name, date, time, and calories are required');
         setIsSaving(false);
@@ -102,7 +102,7 @@ export default function EditMeal({ params }: { params: { id: string } }) {
         return;
       }
 
-      // Create meal data for API
+
       const mealData: Partial<MealInput> = {
         name: formData.name,
         calories: parseInt(formData.calories),
@@ -110,7 +110,7 @@ export default function EditMeal({ params }: { params: { id: string } }) {
         meal_time: formData.time,
       };
 
-      // Add optional fields if provided
+ 
       if (formData.protein) {
         mealData.protein = parseInt(formData.protein);
       }
@@ -120,11 +120,8 @@ export default function EditMeal({ params }: { params: { id: string } }) {
       if (formData.fat) {
         mealData.fat = parseInt(formData.fat);
       }
-
-      // Update meal
       await mealApi.updateMeal(meal.id, mealData);
-      
-      // Redirect to dashboard
+
       router.push('/dashboard');
     } catch (error) {
       if (error instanceof Error) {
@@ -138,7 +135,7 @@ export default function EditMeal({ params }: { params: { id: string } }) {
   };
 
   if (!isAuthenticated) {
-    return null; // Don't render anything while redirecting
+    return null; 
   }
 
   if (isLoading) {
