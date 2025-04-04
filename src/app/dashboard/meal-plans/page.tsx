@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, Suspense } from 'react';
-import { FaPlus, FaSave, FaTrash, FaUtensils } from 'react-icons/fa';
+import { FaPlus, FaSave, FaTrash, FaUtensils, FaEdit } from 'react-icons/fa';
 import styles from './page.module.scss';
 import LoadingIndicator from '@/app/components/LoadingIndicator';
 import { useAuth } from '@/app/context/AuthContext'; 
@@ -118,10 +118,17 @@ export default function MealPlanningPage() {
       // Send to API
       const response = await mealPlanApi.createMealPlan(mealPlanInput);
       
+      // API response contains a mealPlan object with the id
+      if (!response || !response.mealPlan || typeof response.mealPlan.id === 'undefined') {
+        console.error('Invalid API response structure:', response);
+        toast.error('Server returned an invalid response');
+        return;
+      }
+      
       // Create frontend object from response
       const newPlannedMeal: PlannedMeal = {
-        id: response.mealPlan.id.toString(),
-        mealId: meal.id.toString(),
+        id: String(response.mealPlan.id),
+        mealId: String(meal.id),
         day: selectedDay,
         time: selectedTime,
         name: meal.name,
@@ -288,12 +295,20 @@ export default function MealPlanningPage() {
                               <span>{meal.protein}g protein</span>
                             </div>
                           </div>
-                          <button 
-                            className={styles.removeButton}
-                            onClick={() => removeMealFromPlan(meal.id)}
-                          >
-                            <FaTrash />
-                          </button>
+                          <div className={styles.mealActions}>
+                            <button 
+                              className={styles.editButton}
+                              onClick={() => {/* Edit functionality will go here */}}
+                            >
+                              <FaEdit />
+                            </button>
+                            <button 
+                              className={styles.deleteButton}
+                              onClick={() => removeMealFromPlan(meal.id)}
+                            >
+                              <FaTrash />
+                            </button>
+                          </div>
                         </div>
                       ))}
                       

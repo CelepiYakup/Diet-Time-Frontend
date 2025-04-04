@@ -89,7 +89,7 @@ export default function AddMeal() {
       await mealApi.createMeal(user.id, mealData);
       
 
-      router.push('/dashboard');
+      router.push('/meals');
     } catch (error) {
       if (error instanceof Error) {
         setError(error.message);
@@ -231,7 +231,7 @@ export default function AddMeal() {
           >
             {isLoading ? 'Adding...' : 'Add Meal'}
           </button>
-          <Link href="/dashboard" className={`btn btn-secondary ${styles.cancelButton}`}>
+          <Link href="/meals" className={`btn btn-secondary ${styles.cancelButton}`}>
             Cancel
           </Link>
         </div>

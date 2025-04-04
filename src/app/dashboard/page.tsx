@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import styles from './page.module.scss';
 import { useAuth } from '../context/AuthContext';
-import { mealApi, Meal, goalApi, Goal } from '../services/api';
+import { mealApi, Meal, goalApi, Goal, mealPlanApi } from '../services/api';
 import { FaUtensils, FaCalendarAlt, FaHeartbeat, FaBullseye, FaArrowRight, FaEdit, FaTrash } from 'react-icons/fa';
 import ProgressBar from '../components/Progress/ProgressBar';
 import LearnMore from '../components/LearnMore';
@@ -39,16 +39,22 @@ export default function Dashboard() {
         setIsLoading(true);
         const fetchedMeals = await mealApi.getUserMeals(user.id);
         
-        console.log('Fetched meals:', fetchedMeals);
+
+        const today = new Date().toISOString().split('T')[0]; 
+        const todayMeals = fetchedMeals.filter(meal => {
+
+          const mealDate = new Date(meal.meal_date).toISOString().split('T')[0];
+          return mealDate === today;
+        });
         
-        // Show all meals for now to debug
-        setMeals(fetchedMeals);
+        // Set today's meals for display
+        setMeals(todayMeals);
         
-        // Calculate totals for all meals
-        const calories = fetchedMeals.reduce((sum, meal) => sum + meal.calories, 0);
-        const protein = fetchedMeals.reduce((sum, meal) => sum + meal.protein, 0);
-        const carbs = fetchedMeals.reduce((sum, meal) => sum + meal.carbs, 0);
-        const fat = fetchedMeals.reduce((sum, meal) => sum + meal.fat, 0);
+        // Calculate totals for today's meals
+        const calories = todayMeals.reduce((sum, meal) => sum + meal.calories, 0);
+        const protein = todayMeals.reduce((sum, meal) => sum + meal.protein, 0);
+        const carbs = todayMeals.reduce((sum, meal) => sum + meal.carbs, 0);
+        const fat = todayMeals.reduce((sum, meal) => sum + meal.fat, 0);
 
         setTotalCalories(calories);
         setTotalProtein(protein);
@@ -83,6 +89,27 @@ export default function Dashboard() {
 
   const handleDeleteMeal = async (mealId: number) => {
     try {
+      // Check if meal exists in any meal plans
+      if (!user) return;
+      
+      const mealPlans = await mealPlanApi.getUserMealPlans(user.id);
+      const mealPlanReferences = mealPlans.filter(plan => plan.meal_id === mealId);
+      
+      // If the meal is referenced in meal plans, ask for confirmation
+      if (mealPlanReferences.length > 0) {
+        const confirmDelete = window.confirm(
+          `This meal is being used in ${mealPlanReferences.length} meal plan(s). Deleting it will also remove it from your meal plans. Continue?`
+        );
+        
+        if (!confirmDelete) return;
+        
+        // Delete all meal plan references
+        for (const plan of mealPlanReferences) {
+          await mealPlanApi.deleteMealPlan(plan.id);
+        }
+      }
+      
+      // Now delete the meal
       await mealApi.deleteMeal(mealId);
       
       // Update meals list
@@ -109,10 +136,9 @@ export default function Dashboard() {
   };
 
   // Format date for display in UTC
-  const formatDateInUTC = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { 
-      timeZone: 'UTC',
+  const formatDateInUTC = () => {
+    const now = new Date();
+    return now.toLocaleDateString('en-US', { 
       weekday: 'long', 
       year: 'numeric', 
       month: 'long', 
@@ -129,7 +155,7 @@ export default function Dashboard() {
       <section className={styles.dashboardHeader}>
         <h1 className={styles.welcomeMessage}>Welcome back, {user?.username || 'User'}!</h1>
         <p className={styles.dateDisplay}>
-          {formatDateInUTC(new Date().toISOString())}
+          {formatDateInUTC()}
         </p>
       </section>
 
@@ -231,92 +257,6 @@ export default function Dashboard() {
           </div>
         )}
       </section>
-
-      {/* Nutrition Summary Section */}
-      <section className={styles.nutritionSummarySection}>
-        <div className={styles.statsGrid}>
-          <div className={styles.statCard}>
-            <div className={styles.statTitle}>Total Calories</div>
-            <div className={styles.statValue}>{totalCalories}</div>
-          </div>
-          <div className={styles.statCard}>
-            <div className={styles.statTitle}>Protein (g)</div>
-            <div className={styles.statValue}>{totalProtein}</div>
-          </div>
-          <div className={styles.statCard}>
-            <div className={styles.statTitle}>Carbs (g)</div>
-            <div className={styles.statValue}>{totalCarbs}</div>
-          </div>
-          <div className={styles.statCard}>
-            <div className={styles.statTitle}>Fat (g)</div>
-            <div className={styles.statValue}>{totalFat}</div>
-          </div>
-        </div>
-      </section>
-
-      {/* Today's Meals Section */}
-      <section className={styles.recentMealsSection}>
-        <div className={styles.sectionHeader}>
-          <h2 className={styles.sectionTitle}>Today&apos;s Meals</h2>
-          <Link href="/meals/add" className={`btn btn-primary ${styles.addButton}`}>
-            + Add Meal
-          </Link>
-        </div>
-
-        {isLoading ? (
-          <LoadingIndicator text="Loading your meals..." />
-        ) : error ? (
-          <div className={styles.errorState}>{error}</div>
-        ) : meals.length > 0 ? (
-          <div className={styles.mealsList}>
-            {meals.map((meal) => (
-              <div key={meal.id} className={styles.mealCard}>
-                <div className={styles.mealHeader}>
-                  <div className={styles.mealName}>{meal.name}</div>
-                  <div className={styles.mealTime}>{meal.meal_time}</div>
-                </div>
-                <div className={styles.mealDetails}>
-                  <div className={styles.mealDetail}>
-                    <span className={styles.mealDetailLabel}>Calories</span>
-                    <span className={styles.mealDetailValue}>{meal.calories}</span>
-                  </div>
-                  <div className={styles.mealDetail}>
-                    <span className={styles.mealDetailLabel}>Protein</span>
-                    <span className={styles.mealDetailValue}>{meal.protein}g</span>
-                  </div>
-                  <div className={styles.mealDetail}>
-                    <span className={styles.mealDetailLabel}>Carbs</span>
-                    <span className={styles.mealDetailValue}>{meal.carbs}g</span>
-                  </div>
-                  <div className={styles.mealDetail}>
-                    <span className={styles.mealDetailLabel}>Fat</span>
-                    <span className={styles.mealDetailValue}>{meal.fat}g</span>
-                  </div>
-                </div>
-                <div className={styles.mealActions}>
-                  <Link href={`/meals/edit/${meal.id}`} className={styles.editButton}>
-                    <FaEdit />
-                  </Link>
-                  <button 
-                    className={styles.deleteButton}
-                    onClick={() => handleDeleteMeal(meal.id)}
-                  >
-                    <FaTrash />
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className={styles.emptyState}>
-            <p>You haven&apos;t added any meals today.</p>
-            <Link href="/meals/add" className="btn btn-primary">
-              Add Your First Meal
-            </Link>
-          </div>
-        )}
-      </section>
-
       {/* More sections and recommendations */}
       <section className={styles.moreFeaturesSection}>
         <LearnMore 

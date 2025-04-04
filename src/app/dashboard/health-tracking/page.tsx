@@ -17,6 +17,8 @@ import {
 import Sidebar from '@/app/components/Sidebar';
 import { useAuth } from '@/app/context/AuthContext';
 import LoadingIndicator from '@/app/components/LoadingIndicator';
+import { healthApi, BodyMeasurement, VitalSign, BloodWork, SleepPattern } from '@/app/services/api';
+import { toast } from 'react-hot-toast';
 
 // Register ChartJS components
 ChartJS.register(
@@ -29,17 +31,97 @@ ChartJS.register(
   Legend
 );
 
-// Entry types
-interface BaseEntry {
-  id: string;
-  date: string;
-}
+// Helper function to format date strings
+const formatDate = (dateString: string) => {
+  const date = new Date(dateString);
+  return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+};
 
-type BodyMeasurement = BaseEntry & { weight: string; bmi: string; body_fat: string; waist: string; };
-type VitalSign = BaseEntry & { heart_rate: string; blood_pressure: string; temperature: string; respiratory_rate: string; };
-type BloodWork = BaseEntry & { glucose: string; cholesterol: string; hdl: string; ldl: string; triglycerides: string; };
-type SleepPattern = BaseEntry & { duration: string; quality: string; deep_sleep: string; rem_sleep: string; };
+// Helper function to format date for input fields (YYYY-MM-DD)
+const formatDateForInput = (dateString: string) => {
+  if (!dateString) return '';
+  
+  try {
+    // Directly return the date string if it's in YYYY-MM-DD format already
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
+      return dateString;
+    }
+    
+    // Remove any timezone info to prevent date shifts
+    let datePart = dateString;
+    if (dateString.includes('T')) {
+      datePart = dateString.split('T')[0];
+    }
+    
+    // If it's a simple ISO date format (YYYY-MM-DD), return it directly
+    if (/^\d{4}-\d{2}-\d{2}$/.test(datePart)) {
+      return datePart;
+    }
+    
+    // Manual parsing without relying on Date object to avoid timezone issues
+    if (datePart.includes('-')) {
+      const [year, month, day] = datePart.split('-').map(Number);
+      return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    }
+    
+    // Last resort: use the Date object but be very careful with timezone
+    const date = new Date(dateString);
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    
+    // Log to check the parsed date
+    console.log('Parsing date:', dateString, 'as:', `${year}-${month}-${day}`);
+    
+    return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+  } catch (e) {
+    console.error('Invalid date format:', dateString);
+    return '';
+  }
+};
 
+// Helper function to format date for API (YYYY-MM-DD)
+const formatDateForApi = (dateString: string) => {
+  if (!dateString) return '';
+  
+  try {
+    // If it already has the right format, return it
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
+      return dateString;
+    }
+    
+    // Parse the original parts to avoid timezone issues
+    let parts: number[] = [];
+    
+    if (dateString.includes('T')) {
+      parts = dateString.split('T')[0].split('-').map(Number);
+    } else if (dateString.includes('-')) {
+      parts = dateString.split('-').map(Number);
+    } else {
+      const date = new Date(dateString);
+      return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+    }
+    
+    // Make sure we have year, month, day
+    if (parts.length === 3) {
+      const [year, month, day] = parts;
+      return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    }
+    
+    return dateString.split('T')[0];
+  } catch (e) {
+    console.error('Invalid date format:', dateString);
+    return '';
+  }
+};
+
+// Get today's date in YYYY-MM-DD format without timezone issues
+const getTodayDateString = () => {
+  const today = new Date();
+  return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+};
+
+// Interface for form data
 type FormData = {
   date: string;
   // Body measurements
@@ -65,18 +147,11 @@ type FormData = {
   remSleep?: string;
 };
 
-// Format date function
-const formatDate = (dateString: string) => {
-  if (!dateString) return '';
-  
-  // Check if it's an ISO string (like 2025-03-19T21:00:00.000Z)
-  if (dateString.includes('T')) {
-    const date = new Date(dateString);
-    return date.toLocaleDateString();
-  }
-  
-  // Already in date format, return as is
-  return dateString;
+// Function to sort records by date (newest first)
+const sortByDate = <T extends { date: string }>(records: T[]): T[] => {
+  return [...records].sort((a, b) => {
+    return new Date(b.date).getTime() - new Date(a.date).getTime();
+  });
 };
 
 export default function HealthTrackingDashboard() {
@@ -89,12 +164,12 @@ export default function HealthTrackingDashboard() {
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState<FormData>({
-    date: new Date().toISOString().split('T')[0]
+    date: getTodayDateString()
   });
   const [editingEntryId, setEditingEntryId] = useState<string | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  // Toggle sidebar visibility
+
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
@@ -111,26 +186,34 @@ export default function HealthTrackingDashboard() {
         setLoading(true);
         const userId = user.id;
         
-        // Fetch data in parallel using Promise.all
-        const [bodyRes, vitalRes, bloodRes, sleepRes] = await Promise.all([
-          fetch(`/api/health/body-measurements/user/${userId}`),
-          fetch(`/api/health/vital-signs/user/${userId}`),
-          fetch(`/api/health/blood-work/user/${userId}`),
-          fetch(`/api/health/sleep-patterns/user/${userId}`)
-        ]);
-
-        // Process responses
-        if (bodyRes.ok) setBodyMeasurements(await bodyRes.json());
-        else console.error('Error fetching body measurements:', bodyRes.status);
-
-        if (vitalRes.ok) setVitalSigns(await vitalRes.json());
-        else console.error('Error fetching vital signs:', vitalRes.status);
-
-        if (bloodRes.ok) setBloodWork(await bloodRes.json());
-        else console.error('Error fetching blood work:', bloodRes.status);
-
-        if (sleepRes.ok) setSleepPatterns(await sleepRes.json());
-        else console.error('Error fetching sleep patterns:', sleepRes.status);
+        // Use healthApi to fetch data
+        try {
+          const bodyMeasurementsData = await healthApi.getBodyMeasurements(userId);
+          setBodyMeasurements(sortByDate(bodyMeasurementsData));
+        } catch (error) {
+          console.error('Error fetching body measurements:', error);
+        }
+        
+        try {
+          const vitalSignsData = await healthApi.getVitalSigns(userId);
+          setVitalSigns(sortByDate(vitalSignsData));
+        } catch (error) {
+          console.error('Error fetching vital signs:', error);
+        }
+        
+        try {
+          const bloodWorkData = await healthApi.getBloodWork(userId);
+          setBloodWork(sortByDate(bloodWorkData));
+        } catch (error) {
+          console.error('Error fetching blood work:', error);
+        }
+        
+        try {
+          const sleepPatternsData = await healthApi.getSleepPatterns(userId);
+          setSleepPatterns(sortByDate(sleepPatternsData));
+        } catch (error) {
+          console.error('Error fetching sleep patterns:', error);
+        }
       } catch (error) {
         console.error('Error fetching health data:', error);
       } finally {
@@ -147,7 +230,7 @@ export default function HealthTrackingDashboard() {
   };
 
   const handleAddNew = () => {
-    const baseFormData = { date: new Date().toISOString().split('T')[0] };
+    const baseFormData = { date: getTodayDateString() };
     
     switch (activeTab) {
       case 'bodyMeasurements':
@@ -175,11 +258,34 @@ export default function HealthTrackingDashboard() {
   const handleEditEntry = (type: string, entry: BodyMeasurement | VitalSign | BloodWork | SleepPattern) => {
     setActiveTab(type);
     
+    // Convert date to browser-compatible format (YYYY-MM-DD)
+    const rawDate = entry.date;
+    let formattedDate = '';
+    
+    // First try to split by T if present
+    if (rawDate.includes('T')) {
+      formattedDate = rawDate.split('T')[0];
+    } else if (rawDate.includes('-') && rawDate.split('-').length === 3) {
+      // Already in YYYY-MM-DD format
+      formattedDate = rawDate;
+    } else {
+      // Fallback to a safer method
+      try {
+        const dateObj = new Date(rawDate);
+        formattedDate = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
+      } catch (e) {
+        console.error('Could not parse date:', rawDate);
+        formattedDate = getTodayDateString(); // Default to today as a fallback
+      }
+    }
+    
+    console.log('Setting edit date to:', formattedDate, 'Original date:', rawDate);
+    
     switch (type) {
       case 'bodyMeasurements': {
         const bodyEntry = entry as BodyMeasurement;
         setFormData({
-          date: bodyEntry.date,
+          date: formattedDate,
           weight: bodyEntry.weight,
           bmi: bodyEntry.bmi,
           bodyFat: bodyEntry.body_fat,
@@ -190,7 +296,7 @@ export default function HealthTrackingDashboard() {
       case 'vitalSigns': {
         const vitalEntry = entry as VitalSign;
         setFormData({
-          date: vitalEntry.date,
+          date: formattedDate,
           heartRate: vitalEntry.heart_rate,
           bloodPressure: vitalEntry.blood_pressure,
           temperature: vitalEntry.temperature,
@@ -201,7 +307,7 @@ export default function HealthTrackingDashboard() {
       case 'bloodWork': {
         const bloodEntry = entry as BloodWork;
         setFormData({
-          date: bloodEntry.date,
+          date: formattedDate,
           glucose: bloodEntry.glucose,
           cholesterol: bloodEntry.cholesterol,
           hdl: bloodEntry.hdl,
@@ -213,7 +319,7 @@ export default function HealthTrackingDashboard() {
       case 'sleepPatterns': {
         const sleepEntry = entry as SleepPattern;
         setFormData({
-          date: sleepEntry.date,
+          date: formattedDate,
           duration: sleepEntry.duration,
           quality: sleepEntry.quality,
           deepSleep: sleepEntry.deep_sleep,
@@ -228,59 +334,32 @@ export default function HealthTrackingDashboard() {
   };
 
   const handleDeleteEntry = async (type: string, id: string) => {
-    if (!confirm('Are you sure you want to delete this record?')) return;
     if (!user) return;
     
     try {
-      const userId = user.id;
-      let url = '';
-      
       switch (type) {
         case 'bodyMeasurements':
-          url = `/api/health/body-measurements/${id}`;
+          await healthApi.deleteBodyMeasurement(id);
+          setBodyMeasurements(prev => sortByDate(prev.filter(item => item.id !== id)));
           break;
         case 'vitalSigns':
-          url = `/api/health/vital-signs/${id}`;
+          await healthApi.deleteVitalSign(id);
+          setVitalSigns(prev => sortByDate(prev.filter(item => item.id !== id)));
           break;
         case 'bloodWork':
-          url = `/api/health/blood-work/${id}`;
+          await healthApi.deleteBloodWork(id);
+          setBloodWork(prev => sortByDate(prev.filter(item => item.id !== id)));
           break;
         case 'sleepPatterns':
-          url = `/api/health/sleep-patterns/${id}`;
+          await healthApi.deleteSleepPattern(id);
+          setSleepPatterns(prev => sortByDate(prev.filter(item => item.id !== id)));
           break;
       }
       
-      const response = await fetch(url, {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' }
-      });
-      
-      // Refresh data regardless of response success
-      const refreshData = async () => {
-        const [bodyRes, vitalRes, bloodRes, sleepRes] = await Promise.all([
-          fetch(`/api/health/body-measurements/user/${userId}`),
-          fetch(`/api/health/vital-signs/user/${userId}`),
-          fetch(`/api/health/blood-work/user/${userId}`),
-          fetch(`/api/health/sleep-patterns/user/${userId}`)
-        ]);
-        
-        if (bodyRes.ok) setBodyMeasurements(await bodyRes.json());
-        if (vitalRes.ok) setVitalSigns(await vitalRes.json());
-        if (bloodRes.ok) setBloodWork(await bloodRes.json());
-        if (sleepRes.ok) setSleepPatterns(await sleepRes.json());
-      };
-      
-      await refreshData();
-      
-      if (response.ok) {
-        alert('Record successfully deleted.');
-      } else {
-        console.error('Error deleting record:', response.status);
-        alert('Error deleting record. Please try again.');
-      }
+      toast.success('Record successfully deleted.');
     } catch (error) {
       console.error('Error during delete operation:', error);
-      alert('An error occurred. Please try again.');
+      toast.error('An error occurred. Please try again.');
     }
   };
 
@@ -290,118 +369,124 @@ export default function HealthTrackingDashboard() {
     
     try {
       const userId = user.id;
-      let url = '';
-      let dataToSend = {};
-      const method = editingEntryId ? 'PATCH' : 'POST';
       
-      // Prepare data based on active tab
+      // Prepare data and submit based on active tab
       switch (activeTab) {
-        case 'bodyMeasurements':
-          url = editingEntryId 
-            ? `/api/health/body-measurements/${editingEntryId}`
-            : '/api/health/body-measurements';
-          dataToSend = {
+        case 'bodyMeasurements': {
+          const data = {
             user_id: userId,
-            date: formData.date,
-            weight: formData.weight,
-            bmi: formData.bmi,
-            body_fat: formData.bodyFat,
-            waist: formData.waist
+            date: formatDateForApi(formData.date),
+            weight: formData.weight || '',
+            bmi: formData.bmi || '',
+            body_fat: formData.bodyFat || '',
+            waist: formData.waist || ''
           };
-          break;
-        case 'vitalSigns':
-          url = editingEntryId 
-            ? `/api/health/vital-signs/${editingEntryId}`
-            : '/api/health/vital-signs';
-          dataToSend = {
-            user_id: userId,
-            date: formData.date,
-            heart_rate: formData.heartRate,
-            blood_pressure: formData.bloodPressure,
-            temperature: formData.temperature,
-            respiratory_rate: formData.respiratoryRate
-          };
-          break;
-        case 'bloodWork':
-          url = editingEntryId 
-            ? `/api/health/blood-work/${editingEntryId}`
-            : '/api/health/blood-work';
-          dataToSend = {
-            user_id: userId,
-            date: formData.date,
-            glucose: formData.glucose,
-            cholesterol: formData.cholesterol,
-            hdl: formData.hdl,
-            ldl: formData.ldl,
-            triglycerides: formData.triglycerides
-          };
-          break;
-        case 'sleepPatterns':
-          url = editingEntryId 
-            ? `/api/health/sleep-patterns/${editingEntryId}`
-            : '/api/health/sleep-patterns';
-          dataToSend = {
-            user_id: userId,
-            date: formData.date,
-            duration: formData.duration,
-            quality: formData.quality,
-            deep_sleep: formData.deepSleep,
-            rem_sleep: formData.remSleep
-          };
-          break;
-      }
-      
-      // Send request
-      const response = await fetch(url, {
-        method: method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(dataToSend)
-      });
-      
-      // Handle response
-      if (!response.ok) {
-        // If resource not found when editing, try creating instead
-        if (response.status === 404 && editingEntryId) {
-          const createUrl = url.split('/').slice(0, -1).join('/');
-          const createResponse = await fetch(createUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(dataToSend)
-          });
           
-          if (!createResponse.ok) {
-            throw new Error(`Failed to create record: ${createResponse.status}`);
+          if (editingEntryId) {
+            const updatedRecord = await healthApi.updateBodyMeasurement(editingEntryId, data);
+            // Update local state to reflect changes immediately
+            setBodyMeasurements(prevMeasurements => 
+              sortByDate(prevMeasurements.map(item => 
+                item.id === editingEntryId ? updatedRecord : item
+              ))
+            );
+            toast.success('Body measurement record updated successfully.');
+          } else {
+            const newRecord = await healthApi.createBodyMeasurement(data);
+            setBodyMeasurements(prev => sortByDate([...prev, newRecord]));
+            toast.success('New body measurement record created.');
           }
-        } else {
-          throw new Error(`Request failed: ${response.status}`);
+          break;
+        }
+        case 'vitalSigns': {
+          const data = {
+            user_id: userId,
+            date: formatDateForApi(formData.date),
+            heart_rate: formData.heartRate || '',
+            blood_pressure: formData.bloodPressure || '',
+            temperature: formData.temperature || '',
+            respiratory_rate: formData.respiratoryRate || ''
+          };
+          
+          if (editingEntryId) {
+            const updatedRecord = await healthApi.updateVitalSign(editingEntryId, data);
+            // Update local state to reflect changes immediately
+            setVitalSigns(prevSigns => 
+              sortByDate(prevSigns.map(item => 
+                item.id === editingEntryId ? updatedRecord : item
+              ))
+            );
+            toast.success('Vital signs record updated successfully.');
+          } else {
+            const newRecord = await healthApi.createVitalSign(data);
+            setVitalSigns(prev => sortByDate([...prev, newRecord]));
+            toast.success('New vital signs record created.');
+          }
+          break;
+        }
+        case 'bloodWork': {
+          const data = {
+            user_id: userId,
+            date: formatDateForApi(formData.date),
+            glucose: formData.glucose || '',
+            cholesterol: formData.cholesterol || '',
+            hdl: formData.hdl || '',
+            ldl: formData.ldl || '',
+            triglycerides: formData.triglycerides || ''
+          };
+          
+          if (editingEntryId) {
+            const updatedRecord = await healthApi.updateBloodWork(editingEntryId, data);
+            // Update local state to reflect changes immediately
+            setBloodWork(prevWork => 
+              sortByDate(prevWork.map(item => 
+                item.id === editingEntryId ? updatedRecord : item
+              ))
+            );
+            toast.success('Blood work record updated successfully.');
+          } else {
+            const newRecord = await healthApi.createBloodWork(data);
+            setBloodWork(prev => sortByDate([...prev, newRecord]));
+            toast.success('New blood work record created.');
+          }
+          break;
+        }
+        case 'sleepPatterns': {
+          const data = {
+            user_id: userId,
+            date: formatDateForApi(formData.date),
+            duration: formData.duration || '',
+            quality: formData.quality || '',
+            deep_sleep: formData.deepSleep || '',
+            rem_sleep: formData.remSleep || ''
+          };
+          
+          if (editingEntryId) {
+            const updatedRecord = await healthApi.updateSleepPattern(editingEntryId, data);
+            // Update local state to reflect changes immediately
+            setSleepPatterns(prevPatterns => 
+              sortByDate(prevPatterns.map(item => 
+                item.id === editingEntryId ? updatedRecord : item
+              ))
+            );
+            toast.success('Sleep pattern record updated successfully.');
+          } else {
+            const newRecord = await healthApi.createSleepPattern(data);
+            setSleepPatterns(prev => sortByDate([...prev, newRecord]));
+            toast.success('New sleep pattern record created.');
+          }
+          break;
         }
       }
       
-      // Refresh data
-      const refreshData = async () => {
-        const [bodyRes, vitalRes, bloodRes, sleepRes] = await Promise.all([
-          fetch(`/api/health/body-measurements/user/${userId}`),
-          fetch(`/api/health/vital-signs/user/${userId}`),
-          fetch(`/api/health/blood-work/user/${userId}`),
-          fetch(`/api/health/sleep-patterns/user/${userId}`)
-        ]);
-        
-        if (bodyRes.ok) setBodyMeasurements(await bodyRes.json());
-        if (vitalRes.ok) setVitalSigns(await vitalRes.json());
-        if (bloodRes.ok) setBloodWork(await bloodRes.json());
-        if (sleepRes.ok) setSleepPatterns(await sleepRes.json());
-      };
-      
-      await refreshData();
-      
       // Reset form
-      setFormData({ date: new Date().toISOString().split('T')[0] });
+      setFormData({ date: getTodayDateString() });
       setEditingEntryId(null);
       setShowForm(false);
       
     } catch (error) {
       console.error('Error submitting health data:', error);
-      alert('Error saving data. Please try again.');
+      toast.error('Error saving data. Please try again.');
     }
   };
 
@@ -1117,13 +1202,6 @@ export default function HealthTrackingDashboard() {
           <p className={styles.dashboardDescription}>
             Monitor your health metrics and track your progress over time.
           </p>
-          
-          <button 
-            onClick={toggleSidebar} 
-            className={styles.sidebarToggle}
-          >
-            {isSidebarOpen ? 'Close Menu' : 'Open Menu'}
-          </button>
         </div>
         
         {!isAuthenticated ? (

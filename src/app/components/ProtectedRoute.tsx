@@ -20,7 +20,7 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
   }, [isAuthenticated, isLoading, router]);
 
   if (isLoading) {
-    return <LoadingIndicator text="Checking authentication..." />;
+    return <LoadingIndicator text="Loading..." />;
   }
 
   if (!isAuthenticated) {

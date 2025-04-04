@@ -2,12 +2,14 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { toast } from 'react-hot-toast';
 import styles from './page.module.scss';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../context/AuthContext';
-import { mealApi, Meal } from '../services/api';
-import { FaPlus } from 'react-icons/fa';
+import { mealApi, Meal, mealPlanApi } from '../services/api';
+import { FaPlus, FaUtensils, FaSearch, FaEdit, FaTrash } from 'react-icons/fa';
 import ProgressBar from '../components/Progress/ProgressBar';
+import LoadingIndicator from '@/app/components/LoadingIndicator';
 
 interface FilterState {
   searchTerm: string;
@@ -127,17 +129,37 @@ export default function MealTracking() {
 
   const handleDeleteMeal = async (mealId: number) => {
     try {
+      // Check if meal exists in any meal plans
+      if (!user) return;
+      
+      const mealPlans = await mealPlanApi.getUserMealPlans(user.id);
+      const mealPlanReferences = mealPlans.filter(plan => plan.meal_id === mealId);
+      
+      // If the meal is referenced in meal plans, ask for confirmation
+      if (mealPlanReferences.length > 0) {
+        const confirmDelete = window.confirm(
+          `This meal is being used in ${mealPlanReferences.length} meal plan(s). Deleting it will also remove it from your meal plans. Continue?`
+        );
+        
+        if (!confirmDelete) return;
+        
+        // Delete all meal plan references
+        for (const plan of mealPlanReferences) {
+          await mealPlanApi.deleteMealPlan(plan.id);
+        }
+      }
+      
+      // Now delete the meal
       await mealApi.deleteMeal(mealId);
       
-      // Update meals list
-      const updatedMeals = meals.filter(meal => meal.id !== mealId);
-      setMeals(updatedMeals);
-      setFilteredMeals(prevFiltered => 
-        prevFiltered.filter(meal => meal.id !== mealId)
-      );
-    } catch (err) {
-      console.error('Error deleting meal:', err);
-      setError('Failed to delete meal. Please try again later.');
+      // Update both meals and filteredMeals lists
+      setMeals(prevMeals => prevMeals.filter(meal => meal.id !== mealId));
+      setFilteredMeals(prevFiltered => prevFiltered.filter(meal => meal.id !== mealId));
+      
+      toast.success('Meal deleted successfully');
+    } catch (error) {
+      console.error('Error deleting meal:', error);
+      toast.error('Failed to delete meal');
     }
   };
 
@@ -257,9 +279,6 @@ export default function MealTracking() {
       <div className={styles.content}>
         <div className={styles.mealHeader}>
           <h1 className={styles.pageTitle}>Meal Tracker</h1>
-          <button className={styles.addButton} onClick={() => setShowForm(true)}>
-            <FaPlus /> Add Meal
-          </button>
         </div>
         
         {renderCalorieSummary()}
@@ -280,8 +299,12 @@ export default function MealTracking() {
                     </div>
                   </div>
                   <div className={styles.mealActions}>
-                    <Link href={`/meals/edit/${meal.id}`} className={styles.actionButton}>✏️</Link>
-                    <button className={styles.actionButton} onClick={() => handleDeleteMeal(meal.id)}>🗑️</button>
+                    <Link href={`/meals/edit/${meal.id}`} className={styles.editButton}>
+                      <FaEdit />
+                    </Link>
+                    <button className={styles.deleteButton} onClick={() => handleDeleteMeal(meal.id)}>
+                      <FaTrash />
+                    </button>
                   </div>
                 </div>
                 

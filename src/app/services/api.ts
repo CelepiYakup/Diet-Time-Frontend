@@ -2,6 +2,15 @@ import { getAuthToken } from '../context/AuthContext';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
+// Helper function to get authorization headers
+const getAuthHeaders = () => {
+  const token = getAuthToken();
+  return {
+    'Content-Type': 'application/json',
+    ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+  };
+};
+
 export interface User {
   id: number;
   username: string;
@@ -47,10 +56,15 @@ export interface Goal {
   id: number;
   user_id: number;
   category: string;
+  title: string;
+  description: string;
   target_value: number;
   current_value: number;
   unit: string;
   deadline: string;
+  status: string;
+  start_date: string;
+  target_date: string;
   created_at: string;
   updated_at: string;
 }
@@ -83,12 +97,52 @@ export interface MealPlanInput {
   meal_id: number;
 }
 
+// Health data interfaces
+export interface HealthData {
+  id: string;
+  user_id: number;
+  date: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface BodyMeasurement extends HealthData {
+  weight: string;
+  bmi: string;
+  body_fat: string;
+  waist: string;
+}
+
+export interface VitalSign extends HealthData {
+  heart_rate: string;
+  blood_pressure: string;
+  temperature: string;
+  respiratory_rate: string;
+}
+
+export interface BloodWork extends HealthData {
+  glucose: string;
+  cholesterol: string;
+  hdl: string;
+  ldl: string;
+  triglycerides: string;
+}
+
+export interface SleepPattern extends HealthData {
+  duration: string;
+  quality: string;
+  deep_sleep: string;
+  rem_sleep: string;
+}
+
 // User API calls
 export const userApi = {
   // Get all users
   getAllUsers: async (): Promise<User[]> => {
     try {
-      const response = await fetch(`${API_URL}/users`);
+      const response = await fetch(`${API_URL}/users`, {
+        headers: getAuthHeaders()
+      });
       if (!response.ok) {
         throw new Error('Failed to fetch users');
       }
@@ -102,7 +156,9 @@ export const userApi = {
   // Get user by ID
   getUserById: async (id: number): Promise<User> => {
     try {
-      const response = await fetch(`${API_URL}/users/${id}`);
+      const response = await fetch(`${API_URL}/users/${id}`, {
+        headers: getAuthHeaders()
+      });
       if (!response.ok) {
         throw new Error('Failed to fetch user');
       }
@@ -164,9 +220,7 @@ export const userApi = {
     try {
       const response = await fetch(`${API_URL}/users/${id}`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: getAuthHeaders(),
         body: JSON.stringify(userData),
       });
       
@@ -187,6 +241,7 @@ export const userApi = {
     try {
       const response = await fetch(`${API_URL}/users/${id}`, {
         method: 'DELETE',
+        headers: getAuthHeaders()
       });
       
       if (!response.ok) {
@@ -207,7 +262,9 @@ export const mealApi = {
   // Get all meals for a user
   getUserMeals: async (userId: number): Promise<Meal[]> => {
     try {
-      const response = await fetch(`${API_URL}/meals/user/${userId}`);
+      const response = await fetch(`${API_URL}/meals/user/${userId}`, {
+        headers: getAuthHeaders()
+      });
       if (!response.ok) {
         throw new Error('Failed to fetch meals');
       }
@@ -221,7 +278,9 @@ export const mealApi = {
   // Get meal by ID
   getMealById: async (id: number): Promise<Meal> => {
     try {
-      const response = await fetch(`${API_URL}/meals/${id}`);
+      const response = await fetch(`${API_URL}/meals/${id}`, {
+        headers: getAuthHeaders()
+      });
       if (!response.ok) {
         throw new Error('Failed to fetch meal');
       }
@@ -237,9 +296,7 @@ export const mealApi = {
     try {
       const response = await fetch(`${API_URL}/meals`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: getAuthHeaders(),
         body: JSON.stringify({
           user_id: userId,
           ...mealData
@@ -263,9 +320,7 @@ export const mealApi = {
     try {
       const response = await fetch(`${API_URL}/meals/${id}`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: getAuthHeaders(),
         body: JSON.stringify(mealData),
       });
       
@@ -286,6 +341,7 @@ export const mealApi = {
     try {
       const response = await fetch(`${API_URL}/meals/${id}`, {
         method: 'DELETE',
+        headers: getAuthHeaders()
       });
       
       if (!response.ok) {
@@ -306,7 +362,9 @@ export const goalApi = {
   // Get all goals for a user
   getUserGoals: async (userId: number): Promise<Goal[]> => {
     try {
-      const response = await fetch(`${API_URL}/goals/user/${userId}`);
+      const response = await fetch(`${API_URL}/goals/user/${userId}`, {
+        headers: getAuthHeaders()
+      });
       if (!response.ok) {
         throw new Error('Failed to fetch goals');
       }
@@ -320,7 +378,9 @@ export const goalApi = {
   // Get goal by ID
   getGoalById: async (id: number): Promise<Goal> => {
     try {
-      const response = await fetch(`${API_URL}/goals/${id}`);
+      const response = await fetch(`${API_URL}/goals/${id}`, {
+        headers: getAuthHeaders()
+      });
       if (!response.ok) {
         throw new Error('Failed to fetch goal');
       }
@@ -336,9 +396,7 @@ export const goalApi = {
     try {
       const response = await fetch(`${API_URL}/goals`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: getAuthHeaders(),
         body: JSON.stringify(goalData),
       });
       
@@ -359,9 +417,7 @@ export const goalApi = {
     try {
       const response = await fetch(`${API_URL}/goals/${id}`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: getAuthHeaders(),
         body: JSON.stringify(goalData),
       });
       
@@ -382,6 +438,7 @@ export const goalApi = {
     try {
       const response = await fetch(`${API_URL}/goals/${id}`, {
         method: 'DELETE',
+        headers: getAuthHeaders()
       });
       
       if (!response.ok) {
@@ -397,7 +454,9 @@ export const goalApi = {
   // Get goals by category for a user
   getGoalsByCategory: async (userId: number, category: string): Promise<Goal[]> => {
     try {
-      const response = await fetch(`${API_URL}/goals/user/${userId}/category/${category}`);
+      const response = await fetch(`${API_URL}/goals/user/${userId}/category/${category}`, {
+        headers: getAuthHeaders()
+      });
       if (!response.ok) {
         throw new Error('Failed to fetch goals by category');
       }
@@ -411,7 +470,9 @@ export const goalApi = {
   // Get active goals for a user
   getActiveGoals: async (userId: number): Promise<Goal[]> => {
     try {
-      const response = await fetch(`${API_URL}/goals/user/${userId}/active`);
+      const response = await fetch(`${API_URL}/goals/user/${userId}/active`, {
+        headers: getAuthHeaders()
+      });
       if (!response.ok) {
         throw new Error('Failed to fetch active goals');
       }
@@ -423,18 +484,392 @@ export const goalApi = {
   },
 };
 
+// Health tracking API
+export const healthApi = {
+  // Body Measurements
+  getBodyMeasurements: async (userId: number): Promise<BodyMeasurement[]> => {
+    try {
+      const response = await fetch(`${API_URL}/health/body-measurements/user/${userId}`, {
+        headers: getAuthHeaders()
+      });
+      if (!response.ok) {
+        throw new Error('Failed to fetch body measurements');
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching body measurements:', error);
+      throw error;
+    }
+  },
+
+  createBodyMeasurement: async (data: Omit<BodyMeasurement, 'id' | 'created_at' | 'updated_at'>): Promise<BodyMeasurement> => {
+    try {
+      const response = await fetch(`${API_URL}/health/body-measurements`, {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) {
+        throw new Error('Failed to create body measurement');
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('Error creating body measurement:', error);
+      throw error;
+    }
+  },
+
+  updateBodyMeasurement: async (id: string, data: Partial<BodyMeasurement>): Promise<BodyMeasurement> => {
+    try {
+      // Ensure date is in correct format if provided
+      if (data.date && typeof data.date === 'string') {
+        // Keep date in YYYY-MM-DD format
+        if (data.date.includes('T')) {
+          data.date = data.date.split('T')[0];
+        }
+        
+        // Log the date we're sending to the API
+        console.log('Sending date to API:', data.date);
+      }
+      
+      const response = await fetch(`${API_URL}/health/body-measurements/${id}`, {
+        method: 'PUT',
+        headers: getAuthHeaders(),
+        body: JSON.stringify(data),
+      });
+      
+      // If record doesn't exist, create a new one instead
+      if (response.status === 404) {
+        console.warn(`Body measurement with ID ${id} not found, creating a new record instead`);
+        if (data.user_id) {
+          return await healthApi.createBodyMeasurement(data as Omit<BodyMeasurement, 'id' | 'created_at' | 'updated_at'>);
+        } else {
+          throw new Error('User ID is required to create a new record');
+        }
+      }
+      
+      if (!response.ok) {
+        throw new Error('Failed to update body measurement');
+      }
+      
+      const result = await response.json();
+      
+      // Log the response to check returned date
+      console.log('API response data:', result);
+      
+      return result;
+    } catch (error) {
+      console.error('Error updating body measurement:', error);
+      throw error;
+    }
+  },
+
+  deleteBodyMeasurement: async (id: string): Promise<{ message: string }> => {
+    try {
+      const response = await fetch(`${API_URL}/health/body-measurements/${id}`, {
+        method: 'DELETE',
+        headers: getAuthHeaders()
+      });
+      if (!response.ok) {
+        throw new Error('Failed to delete body measurement');
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('Error deleting body measurement:', error);
+      throw error;
+    }
+  },
+
+  // Vital Signs
+  getVitalSigns: async (userId: number): Promise<VitalSign[]> => {
+    try {
+      const response = await fetch(`${API_URL}/health/vital-signs/user/${userId}`, {
+        headers: getAuthHeaders()
+      });
+      if (!response.ok) {
+        throw new Error('Failed to fetch vital signs');
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching vital signs:', error);
+      throw error;
+    }
+  },
+
+  createVitalSign: async (data: Omit<VitalSign, 'id' | 'created_at' | 'updated_at'>): Promise<VitalSign> => {
+    try {
+      const response = await fetch(`${API_URL}/health/vital-signs`, {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) {
+        throw new Error('Failed to create vital sign');
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('Error creating vital sign:', error);
+      throw error;
+    }
+  },
+
+  updateVitalSign: async (id: string, data: Partial<VitalSign>): Promise<VitalSign> => {
+    try {
+      // Ensure date is in correct format if provided
+      if (data.date && typeof data.date === 'string') {
+        // Keep date in YYYY-MM-DD format
+        if (data.date.includes('T')) {
+          data.date = data.date.split('T')[0];
+        }
+        
+        // Log the date we're sending to the API
+        console.log('Sending date to API:', data.date);
+      }
+      
+      const response = await fetch(`${API_URL}/health/vital-signs/${id}`, {
+        method: 'PUT',
+        headers: getAuthHeaders(),
+        body: JSON.stringify(data),
+      });
+      
+      // If record doesn't exist, create a new one instead
+      if (response.status === 404) {
+        console.warn(`Vital sign with ID ${id} not found, creating a new record instead`);
+        if (data.user_id) {
+          return await healthApi.createVitalSign(data as Omit<VitalSign, 'id' | 'created_at' | 'updated_at'>);
+        } else {
+          throw new Error('User ID is required to create a new record');
+        }
+      }
+      
+      if (!response.ok) {
+        throw new Error('Failed to update vital sign');
+      }
+      
+      const result = await response.json();
+      
+      // Log the response to check returned date
+      console.log('API response data:', result);
+      
+      return result;
+    } catch (error) {
+      console.error('Error updating vital sign:', error);
+      throw error;
+    }
+  },
+
+  deleteVitalSign: async (id: string): Promise<{ message: string }> => {
+    try {
+      const response = await fetch(`${API_URL}/health/vital-signs/${id}`, {
+        method: 'DELETE',
+        headers: getAuthHeaders()
+      });
+      if (!response.ok) {
+        throw new Error('Failed to delete vital sign');
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('Error deleting vital sign:', error);
+      throw error;
+    }
+  },
+
+  // Blood Work
+  getBloodWork: async (userId: number): Promise<BloodWork[]> => {
+    try {
+      const response = await fetch(`${API_URL}/health/blood-work/user/${userId}`, {
+        headers: getAuthHeaders()
+      });
+      if (!response.ok) {
+        throw new Error('Failed to fetch blood work');
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching blood work:', error);
+      throw error;
+    }
+  },
+
+  createBloodWork: async (data: Omit<BloodWork, 'id' | 'created_at' | 'updated_at'>): Promise<BloodWork> => {
+    try {
+      const response = await fetch(`${API_URL}/health/blood-work`, {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) {
+        throw new Error('Failed to create blood work');
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('Error creating blood work:', error);
+      throw error;
+    }
+  },
+
+  updateBloodWork: async (id: string, data: Partial<BloodWork>): Promise<BloodWork> => {
+    try {
+      // Ensure date is in correct format if provided
+      if (data.date && typeof data.date === 'string') {
+        // Keep date in YYYY-MM-DD format
+        if (data.date.includes('T')) {
+          data.date = data.date.split('T')[0];
+        }
+        
+        // Log the date we're sending to the API
+        console.log('Sending date to API:', data.date);
+      }
+      
+      const response = await fetch(`${API_URL}/health/blood-work/${id}`, {
+        method: 'PUT',
+        headers: getAuthHeaders(),
+        body: JSON.stringify(data),
+      });
+      
+      // If record doesn't exist, create a new one instead
+      if (response.status === 404) {
+        console.warn(`Blood work with ID ${id} not found, creating a new record instead`);
+        if (data.user_id) {
+          return await healthApi.createBloodWork(data as Omit<BloodWork, 'id' | 'created_at' | 'updated_at'>);
+        } else {
+          throw new Error('User ID is required to create a new record');
+        }
+      }
+      
+      if (!response.ok) {
+        throw new Error('Failed to update blood work');
+      }
+      
+      const result = await response.json();
+      
+      // Log the response to check returned date
+      console.log('API response data:', result);
+      
+      return result;
+    } catch (error) {
+      console.error('Error updating blood work:', error);
+      throw error;
+    }
+  },
+
+  deleteBloodWork: async (id: string): Promise<{ message: string }> => {
+    try {
+      const response = await fetch(`${API_URL}/health/blood-work/${id}`, {
+        method: 'DELETE',
+        headers: getAuthHeaders()
+      });
+      if (!response.ok) {
+        throw new Error('Failed to delete blood work');
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('Error deleting blood work:', error);
+      throw error;
+    }
+  },
+
+  // Sleep Patterns
+  getSleepPatterns: async (userId: number): Promise<SleepPattern[]> => {
+    try {
+      const response = await fetch(`${API_URL}/health/sleep-patterns/user/${userId}`, {
+        headers: getAuthHeaders()
+      });
+      if (!response.ok) {
+        throw new Error('Failed to fetch sleep patterns');
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching sleep patterns:', error);
+      throw error;
+    }
+  },
+
+  createSleepPattern: async (data: Omit<SleepPattern, 'id' | 'created_at' | 'updated_at'>): Promise<SleepPattern> => {
+    try {
+      const response = await fetch(`${API_URL}/health/sleep-patterns`, {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) {
+        throw new Error('Failed to create sleep pattern');
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('Error creating sleep pattern:', error);
+      throw error;
+    }
+  },
+
+  updateSleepPattern: async (id: string, data: Partial<SleepPattern>): Promise<SleepPattern> => {
+    try {
+      // Ensure date is in correct format if provided
+      if (data.date && typeof data.date === 'string') {
+        // Keep date in YYYY-MM-DD format
+        if (data.date.includes('T')) {
+          data.date = data.date.split('T')[0];
+        }
+        
+        // Log the date we're sending to the API
+        console.log('Sending date to API:', data.date);
+      }
+      
+      const response = await fetch(`${API_URL}/health/sleep-patterns/${id}`, {
+        method: 'PUT',
+        headers: getAuthHeaders(),
+        body: JSON.stringify(data),
+      });
+      
+      // If record doesn't exist, create a new one instead
+      if (response.status === 404) {
+        console.warn(`Sleep pattern with ID ${id} not found, creating a new record instead`);
+        if (data.user_id) {
+          return await healthApi.createSleepPattern(data as Omit<SleepPattern, 'id' | 'created_at' | 'updated_at'>);
+        } else {
+          throw new Error('User ID is required to create a new record');
+        }
+      }
+      
+      if (!response.ok) {
+        throw new Error('Failed to update sleep pattern');
+      }
+      
+      const result = await response.json();
+      
+      // Log the response to check returned date
+      console.log('API response data:', result);
+      
+      return result;
+    } catch (error) {
+      console.error('Error updating sleep pattern:', error);
+      throw error;
+    }
+  },
+
+  deleteSleepPattern: async (id: string): Promise<{ message: string }> => {
+    try {
+      const response = await fetch(`${API_URL}/health/sleep-patterns/${id}`, {
+        method: 'DELETE',
+        headers: getAuthHeaders()
+      });
+      if (!response.ok) {
+        throw new Error('Failed to delete sleep pattern');
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('Error deleting sleep pattern:', error);
+      throw error;
+    }
+  }
+};
+
 // Meal Plan API calls
 export const mealPlanApi = {
   // Get all meal plans for a user
   getUserMealPlans: async (userId: number): Promise<MealPlan[]> => {
     try {
-      // Get token using helper function
-      const token = getAuthToken();
-      
       const response = await fetch(`${API_URL}/meal-plans/user/${userId}`, {
-        headers: {
-          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
-        }
+        headers: getAuthHeaders()
       });
       if (!response.ok) {
         throw new Error('Failed to fetch meal plans');
@@ -449,15 +884,9 @@ export const mealPlanApi = {
   // Create a new meal plan entry
   createMealPlan: async (mealPlanData: MealPlanInput): Promise<{ message: string; mealPlan: MealPlan }> => {
     try {
-      // Get token using helper function
-      const token = getAuthToken();
-      
       const response = await fetch(`${API_URL}/meal-plans`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
-        },
+        headers: getAuthHeaders(),
         body: JSON.stringify(mealPlanData),
       });
       
@@ -473,18 +902,12 @@ export const mealPlanApi = {
     }
   },
 
-  // Update a meal plan entry
-  updateMealPlan: async (id: number, mealPlanData: Partial<MealPlanInput>): Promise<{ message: string; mealPlan: MealPlan }> => {
+  // Update meal plan entry
+  updateMealPlan: async (id: number, mealPlanData: Partial<MealPlanInput>): Promise<MealPlan> => {
     try {
-      // Get token using helper function
-      const token = getAuthToken();
-      
       const response = await fetch(`${API_URL}/meal-plans/${id}`, {
         method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
-        },
+        headers: getAuthHeaders(),
         body: JSON.stringify(mealPlanData),
       });
       
@@ -500,25 +923,18 @@ export const mealPlanApi = {
     }
   },
 
-  // Delete a meal plan entry
-  deleteMealPlan: async (id: number): Promise<{ message: string }> => {
+  // Delete meal plan entry
+  deleteMealPlan: async (id: number): Promise<void> => {
     try {
-      // Get token using helper function
-      const token = getAuthToken();
-      
       const response = await fetch(`${API_URL}/meal-plans/${id}`, {
         method: 'DELETE',
-        headers: {
-          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
-        }
+        headers: getAuthHeaders()
       });
       
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.message || 'Failed to delete meal plan');
       }
-      
-      return await response.json();
     } catch (error) {
       console.error('Error deleting meal plan:', error);
       throw error;
@@ -526,24 +942,17 @@ export const mealPlanApi = {
   },
   
   // Delete all meal plans for a specific day
-  deleteMealPlansForDay: async (userId: number, day: string): Promise<{ message: string }> => {
+  deleteMealPlansForDay: async (userId: number, day: string): Promise<void> => {
     try {
-      // Get token using helper function
-      const token = getAuthToken();
-      
       const response = await fetch(`${API_URL}/meal-plans/user/${userId}/day/${day}`, {
         method: 'DELETE',
-        headers: {
-          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
-        }
+        headers: getAuthHeaders()
       });
       
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.message || 'Failed to delete meal plans for day');
       }
-      
-      return await response.json();
     } catch (error) {
       console.error('Error deleting meal plans for day:', error);
       throw error;

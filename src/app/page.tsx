@@ -20,12 +20,7 @@ export default function Home() {
       title: 'Dietary Progress Monitoring',
       description: 'Track your dietary progress with precision using real-time tracking and visualization tools.',
     },
-    {
-      id: 'communication',
-      icon: '💬',
-      title: 'Client Communication Tools',
-      description: 'Maintain seamless contact with nutrition professionals through secure messaging and video conferencing.'
-    },
+
     {
       id: 'health-tracking',
       icon: '❤️',

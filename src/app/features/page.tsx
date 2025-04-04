@@ -21,13 +21,7 @@ export default function FeaturesOverview() {
       description: 'Visualize your journey with interactive charts, customizable dashboards, and comprehensive progress reports.',
       link: '/features/progress-tracking'
     },
-    {
-      id: 'community',
-      icon: <FaUsers className={styles.featureIcon} />,
-      title: 'Community',
-      description: 'Connect with like-minded individuals through discussion forums, support groups, and recipe sharing.',
-      link: '/features/community'
-    },
+
     {
       id: 'health-tracking',
       icon: <FaHeartbeat className={styles.featureIcon} />,

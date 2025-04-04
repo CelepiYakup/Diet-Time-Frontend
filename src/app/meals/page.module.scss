@@ -104,13 +104,41 @@
   gap: 0.5rem;
 }
 
-.actionButton {
-  padding: 0.25rem;
-  border-radius: var(--border-radius);
-  transition: background-color var(--transition-speed);
+.editButton, .deleteButton {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.9rem;
+  text-decoration: none;
+}
+
+.editButton {
+  background-color: #f5f7fa;
+  color: #000000;
+  border: 1px solid #000000;
   
   &:hover {
-    background-color: var(--light-gray);
+    background-color: darken(#4a8eda, 10%);
+    color: #f5f7fa;
+    border: 1px solid #4a8eda;
+  }
+}
+
+.deleteButton {
+  background-color: #f5f7fa;
+  border: 1px solid #000000;
+  color: #000000;
+  
+  &:hover {
+    background-color: darken(#dc3545, 10%);
+    color: #f5f7fa;
+    border: 1px solid #dc3545;
   }
 }
 
