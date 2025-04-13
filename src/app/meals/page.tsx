@@ -1,15 +1,14 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import Link from 'next/link';
-import { toast } from 'react-hot-toast';
-import styles from './page.module.scss';
-import { useRouter } from 'next/navigation';
-import { useAuth } from '../context/AuthContext';
-import { mealApi, Meal, mealPlanApi } from '../services/api';
-import { FaPlus, FaUtensils, FaSearch, FaEdit, FaTrash } from 'react-icons/fa';
-import ProgressBar from '../components/Progress/ProgressBar';
-import LoadingIndicator from '@/app/components/LoadingIndicator';
+import React, { useState, useEffect } from "react";
+import Link from "next/link";
+import { toast } from "react-hot-toast";
+import styles from "./page.module.scss";
+import { useRouter } from "next/navigation";
+import { useAuth } from "../context/AuthContext";
+import { mealApi, Meal, mealPlanApi } from "../services/api";
+import { FaEdit, FaTrash } from "react-icons/fa";
+import ProgressBar from "../components/Progress/ProgressBar";
 
 interface FilterState {
   searchTerm: string;
@@ -20,23 +19,22 @@ interface FilterState {
 export default function MealTracking() {
   const router = useRouter();
   const { isAuthenticated, user } = useAuth();
-  
+
   const [meals, setMeals] = useState<Meal[]>([]);
   const [filteredMeals, setFilteredMeals] = useState<Meal[]>([]);
   const [filters, setFilters] = useState<FilterState>({
-    searchTerm: '',
-    sortBy: 'date',
-    filterBy: 'all'
+    searchTerm: "",
+    sortBy: "date",
+    filterBy: "all",
   });
-  
+
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
 
   useEffect(() => {
-    // Redirect if not authenticated
     if (!isAuthenticated) {
-      router.push('/login');
+      router.push("/login");
       return;
     }
 
@@ -49,8 +47,8 @@ export default function MealTracking() {
         setMeals(fetchedMeals);
         setFilteredMeals(fetchedMeals);
       } catch (err) {
-        console.error('Error fetching meals:', err);
-        setError('Failed to load meals. Please try again later.');
+        console.error("Error fetching meals:", err);
+        setError("Failed to load meals. Please try again later.");
       } finally {
         setIsLoading(false);
       }
@@ -59,7 +57,9 @@ export default function MealTracking() {
     fetchMeals();
   }, [isAuthenticated, router, user]);
 
-  const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleFilterChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
     setFilters((prev) => ({
       ...prev,
@@ -69,55 +69,76 @@ export default function MealTracking() {
 
   const applyFilters = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     let filtered = [...meals];
-    
-    // Filter by meal name
+
     if (filters.searchTerm) {
-      filtered = filtered.filter(meal => 
+      filtered = filtered.filter((meal) =>
         meal.name.toLowerCase().includes(filters.searchTerm.toLowerCase())
       );
     }
-    
-    // Filter by start date
-    if (filters.filterBy === 'today') {
+
+    if (filters.filterBy === "today") {
       const today = new Date().toDateString();
-      filtered = filtered.filter(meal => new Date(meal.meal_date).toDateString() === today);
-    } else if (filters.filterBy === 'this-week') {
-      const startOfWeek = new Date().setDate(new Date().getDate() - new Date().getDay());
-      const endOfWeek = new Date().setDate(new Date().getDate() - new Date().getDay() + 7);
-      filtered = filtered.filter(meal => 
-        new Date(meal.meal_date).getTime() >= startOfWeek && new Date(meal.meal_date).getTime() <= endOfWeek
+      filtered = filtered.filter(
+        (meal) => new Date(meal.meal_date).toDateString() === today
       );
-    } else if (filters.filterBy === 'this-month') {
-      const startOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1).getTime();
-      const endOfMonth = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getTime();
-      filtered = filtered.filter(meal => 
-        new Date(meal.meal_date).getTime() >= startOfMonth && new Date(meal.meal_date).getTime() <= endOfMonth
+    } else if (filters.filterBy === "this-week") {
+      const startOfWeek = new Date().setDate(
+        new Date().getDate() - new Date().getDay()
+      );
+      const endOfWeek = new Date().setDate(
+        new Date().getDate() - new Date().getDay() + 7
+      );
+      filtered = filtered.filter(
+        (meal) =>
+          new Date(meal.meal_date).getTime() >= startOfWeek &&
+          new Date(meal.meal_date).getTime() <= endOfWeek
+      );
+    } else if (filters.filterBy === "this-month") {
+      const startOfMonth = new Date(
+        new Date().getFullYear(),
+        new Date().getMonth(),
+        1
+      ).getTime();
+      const endOfMonth = new Date(
+        new Date().getFullYear(),
+        new Date().getMonth() + 1,
+        0
+      ).getTime();
+      filtered = filtered.filter(
+        (meal) =>
+          new Date(meal.meal_date).getTime() >= startOfMonth &&
+          new Date(meal.meal_date).getTime() <= endOfMonth
       );
     }
-    
+
     // Sort meals
-    if (filters.sortBy === 'date') {
-      filtered.sort((a, b) => new Date(a.meal_date).getTime() - new Date(b.meal_date).getTime());
-    } else if (filters.sortBy === 'calories') {
-      filtered.sort((a, b) => Number(b.calories || 0) - Number(a.calories || 0));
-    } else if (filters.sortBy === 'protein') {
+    if (filters.sortBy === "date") {
+      filtered.sort(
+        (a, b) =>
+          new Date(a.meal_date).getTime() - new Date(b.meal_date).getTime()
+      );
+    } else if (filters.sortBy === "calories") {
+      filtered.sort(
+        (a, b) => Number(b.calories || 0) - Number(a.calories || 0)
+      );
+    } else if (filters.sortBy === "protein") {
       filtered.sort((a, b) => Number(b.protein || 0) - Number(a.protein || 0));
-    } else if (filters.sortBy === 'carbs') {
+    } else if (filters.sortBy === "carbs") {
       filtered.sort((a, b) => Number(b.carbs || 0) - Number(a.carbs || 0));
-    } else if (filters.sortBy === 'fat') {
+    } else if (filters.sortBy === "fat") {
       filtered.sort((a, b) => Number(b.fat || 0) - Number(a.fat || 0));
     }
-    
+
     setFilteredMeals(filtered);
   };
 
   const resetFilters = () => {
     setFilters({
-      searchTerm: '',
-      sortBy: 'date',
-      filterBy: 'all'
+      searchTerm: "",
+      sortBy: "date",
+      filterBy: "all",
     });
     setFilteredMeals(meals);
   };
@@ -129,81 +150,82 @@ export default function MealTracking() {
 
   const handleDeleteMeal = async (mealId: number) => {
     try {
-      // Check if meal exists in any meal plans
       if (!user) return;
-      
+
       const mealPlans = await mealPlanApi.getUserMealPlans(user.id);
-      const mealPlanReferences = mealPlans.filter(plan => plan.meal_id === mealId);
-      
-      // If the meal is referenced in meal plans, ask for confirmation
+      const mealPlanReferences = mealPlans.filter(
+        (plan) => plan.meal_id === mealId
+      );
+
       if (mealPlanReferences.length > 0) {
         const confirmDelete = window.confirm(
           `This meal is being used in ${mealPlanReferences.length} meal plan(s). Deleting it will also remove it from your meal plans. Continue?`
         );
-        
+
         if (!confirmDelete) return;
-        
-        // Delete all meal plan references
+
         for (const plan of mealPlanReferences) {
           await mealPlanApi.deleteMealPlan(plan.id);
         }
       }
-      
-      // Now delete the meal
+
       await mealApi.deleteMeal(mealId);
-      
-      // Update both meals and filteredMeals lists
-      setMeals(prevMeals => prevMeals.filter(meal => meal.id !== mealId));
-      setFilteredMeals(prevFiltered => prevFiltered.filter(meal => meal.id !== mealId));
-      
-      toast.success('Meal deleted successfully');
+
+      setMeals((prevMeals) => prevMeals.filter((meal) => meal.id !== mealId));
+      setFilteredMeals((prevFiltered) =>
+        prevFiltered.filter((meal) => meal.id !== mealId)
+      );
+
+      toast.success("Meal deleted successfully");
     } catch (error) {
-      console.error('Error deleting meal:', error);
-      toast.error('Failed to delete meal');
+      toast.error("Failed to delete meal");
     }
   };
 
-  // Calculate daily calorie totals
+
   const dailyCalories = meals.reduce((acc, meal) => {
     const mealDate = new Date(meal.meal_date).toDateString();
-    
+
     if (!acc[mealDate]) {
       acc[mealDate] = 0;
     }
-    
+
     acc[mealDate] += Number(meal.calories || 0);
     return acc;
   }, {} as Record<string, number>);
 
-  // Show calorie tracking summary
+
   const renderCalorieSummary = () => {
     const today = new Date().toDateString();
     const todayCalories = dailyCalories[today] || 0;
-    const targetCalories = 2000; // This would be user-specific in a real app
-    
+    const targetCalories = 2000; 
+
     return (
       <div className={styles.calorieSummary}>
-        <h3 className={styles.summaryTitle}>Today&apos;s Calories</h3>
-        <ProgressBar 
+        <h3 className={styles.summaryTitle}>Today's Calories</h3>
+        <ProgressBar
           currentValue={todayCalories}
           maxValue={targetCalories}
           unit="kcal"
           title="Daily Calorie Intake"
-          variant={todayCalories > targetCalories ? 'danger' : 'success'}
+          variant={todayCalories > targetCalories ? "danger" : "success"}
         />
       </div>
     );
   };
 
   if (!isAuthenticated) {
-    return null; // Don't render anything while redirecting
+    return null; 
   }
 
   return (
     <div className={styles.mealsContainer}>
       <div className={styles.header}>
         <h1 className={styles.title}>Your Meals</h1>
-        <Link href="/meals/add" className={`btn btn-primary ${styles.addButton}`}>
+        <Link
+          href="/meals/add"
+          className={`btn btn-primary ${styles.addButton}`}
+        >
           + Add Meal
         </Link>
       </div>
@@ -224,7 +246,7 @@ export default function MealTracking() {
               placeholder="e.g., Breakfast"
             />
           </div>
-          
+
           <div className={styles.filterGroup}>
             <label htmlFor="filterBy" className={styles.filterLabel}>
               Filter By
@@ -242,7 +264,7 @@ export default function MealTracking() {
               <option value="this-month">This Month</option>
             </select>
           </div>
-          
+
           <div className={styles.filterGroup}>
             <label htmlFor="sortBy" className={styles.filterLabel}>
               Sort By
@@ -261,13 +283,16 @@ export default function MealTracking() {
               <option value="fat">Fat</option>
             </select>
           </div>
-          
-          <button type="submit" className={`btn btn-primary ${styles.filterButton}`}>
+
+          <button
+            type="submit"
+            className={`btn btn-primary ${styles.filterButton}`}
+          >
             Filter
           </button>
-          
-          <button 
-            type="button" 
+
+          <button
+            type="button"
             className={`btn btn-secondary ${styles.filterButton}`}
             onClick={resetFilters}
           >
@@ -280,9 +305,9 @@ export default function MealTracking() {
         <div className={styles.mealHeader}>
           <h1 className={styles.pageTitle}>Meal Tracker</h1>
         </div>
-        
+
         {renderCalorieSummary()}
-        
+
         {isLoading ? (
           <div className={styles.loadingState}>Loading meals...</div>
         ) : error ? (
@@ -299,15 +324,21 @@ export default function MealTracking() {
                     </div>
                   </div>
                   <div className={styles.mealActions}>
-                    <Link href={`/meals/edit/${meal.id}`} className={styles.editButton}>
+                    <Link
+                      href={`/meals/edit/${meal.id}`}
+                      className={styles.editButton}
+                    >
                       <FaEdit />
                     </Link>
-                    <button className={styles.deleteButton} onClick={() => handleDeleteMeal(meal.id)}>
+                    <button
+                      className={styles.deleteButton}
+                      onClick={() => handleDeleteMeal(meal.id)}
+                    >
                       <FaTrash />
                     </button>
                   </div>
                 </div>
-                
+
                 <div className={styles.mealDetails}>
                   <div className={styles.mealDetail}>
                     <span className={styles.detailLabel}>Calories</span>
@@ -331,7 +362,9 @@ export default function MealTracking() {
           </div>
         ) : (
           <div className={styles.emptyState}>
-            <p className={styles.emptyStateText}>No meals found. Try adjusting your filters or add a new meal.</p>
+            <p className={styles.emptyStateText}>
+              No meals found. Try adjusting your filters or add a new meal.
+            </p>
             <Link href="/meals/add" className="btn btn-primary">
               Add Your First Meal
             </Link>
@@ -340,4 +373,4 @@ export default function MealTracking() {
       </div>
     </div>
   );
-} 
+}

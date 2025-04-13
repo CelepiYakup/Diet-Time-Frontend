@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { FaUtensils, FaChartLine, FaUsers, FaHeartbeat, FaBullseye } from 'react-icons/fa';
+import { FaUtensils, FaChartLine,FaHeartbeat, FaBullseye } from 'react-icons/fa';
 import styles from './page.module.scss';
 
 export default function FeaturesOverview() {

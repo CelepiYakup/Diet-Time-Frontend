@@ -93,7 +93,7 @@ export default function Home() {
         <h2 className={styles.sectionTitle}>What Our Users Say</h2>
         <div className={styles.testimonial}>
           <p className={styles.testimonialText}>
-            &quot;Diet Time has completely transformed how I approach nutrition. The personalized meal plans and progress tracking have helped me achieve my health goals faster than I ever thought possible.&quot;
+            "Diet Time has completely transformed how I approach nutrition. The personalized meal plans and progress tracking have helped me achieve my health goals faster than I ever thought possible."
           </p>
           <div className={styles.testimonialAuthor}>
             <p className={styles.authorName}>Michael R.</p>

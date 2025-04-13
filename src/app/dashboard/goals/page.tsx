@@ -8,6 +8,7 @@ import { useAuth } from '../../context/AuthContext';
 import { goalApi, Goal, GoalInput } from '../../services/api';
 import ProgressBar from '@/app/components/Progress/ProgressBar';
 import LoadingIndicator from '@/app/components/LoadingIndicator';
+import { toast } from 'react-hot-toast';
 
 export default function GoalSettingDashboard() {
   const router = useRouter();
@@ -69,13 +70,13 @@ export default function GoalSettingDashboard() {
       setLoading(true);
       setError(null);
       
-      // Validate required fields
+
       if (!formData.category || !formData.target_value || !formData.current_value || !formData.unit || !formData.deadline) {
         setError('All fields are required');
         return;
       }
 
-      // Validate numeric fields
+
       if (isNaN(parseFloat(formData.target_value))) {
         setError('Target value must be a valid number');
         return;
@@ -86,7 +87,7 @@ export default function GoalSettingDashboard() {
         return;
       }
 
-      // Prepare form data with proper type conversions
+
       const goalData: GoalInput = {
         user_id: user.id,
         category: formData.category,
@@ -102,7 +103,7 @@ export default function GoalSettingDashboard() {
         await goalApi.createGoal(goalData);
       }
       
-      // Reset form and refresh data
+
       setFormData({
         category: 'weight',
         target_value: '',
@@ -123,17 +124,17 @@ export default function GoalSettingDashboard() {
   };
 
   const handleDeleteGoal = async (goalId: number) => {
-    if (!confirm('Are you sure you want to delete this goal?')) return;
     if (!user) return;
 
     try {
       setLoading(true);
       await goalApi.deleteGoal(goalId);
-      // Refresh goals list after deletion
-      fetchGoals();
+
+      await fetchGoals();
+      toast.success('Goal deleted successfully');
     } catch (err) {
       console.error('Failed to delete goal:', err);
-      setError('Failed to delete goal. Please try again.');
+      toast.error('Failed to delete goal. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -162,7 +163,7 @@ export default function GoalSettingDashboard() {
     setShowForm(true);
   };
 
-  // Compute filtered goals based on active category
+
   const displayedGoals = activeCategory === 'all' 
     ? goals 
     : goals.filter(goal => goal.category === activeCategory);
@@ -375,7 +376,7 @@ export default function GoalSettingDashboard() {
             <div className={styles.emptyState}>
               <FaBullseye className={styles.emptyIcon} />
               <h3>No Goals Found</h3>
-              <p>You haven&apos;t set any goals yet. Click the &quot;Add New Goal&quot; button to get started.</p>
+              <p>You haven't set any goals yet. Click the "Add New Goal" button to get started.</p>
             </div>
           )}
         </>

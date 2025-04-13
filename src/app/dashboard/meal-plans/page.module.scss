@@ -97,6 +97,260 @@
   }
 }
 
+// Source toggle buttons (new)
+.sourceToggle {
+  display: flex;
+  width: 100%;
+  margin-bottom: 1rem;
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid $border-color;
+}
+
+.sourceButton {
+  flex: 1;
+  padding: 0.75rem;
+  border: none;
+  background-color: $bg-lighter;
+  color: $text-light;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  
+  &:hover {
+    background-color: darken($bg-lighter, 5%);
+  }
+  
+  &.activeSource {
+    background-color: $primary-color;
+    color: white;
+  }
+}
+
+// External meal search (new)
+.externalSearchSection {
+  width: 100%;
+}
+
+.searchInputContainer {
+  display: flex;
+  margin-bottom: 1rem;
+  width: 100%;
+}
+
+.searchInput {
+  flex: 1;
+  padding: 0.75rem;
+  border: 1px solid $border-color;
+  border-right: none;
+  border-top-left-radius: 4px;
+  border-bottom-left-radius: 4px;
+  background-color: $bg-lighter;
+  color: $text-primary;
+  font-size: 1rem;
+  
+  &:focus {
+    outline: none;
+    border-color: $primary-color;
+  }
+}
+
+.searchButton {
+  padding: 0.75rem 1rem;
+  border: 1px solid $border-color;
+  border-left: none;
+  border-top-right-radius: 4px;
+  border-bottom-right-radius: 4px;
+  background-color: $primary-color;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  
+  &:hover {
+    background-color: darken($primary-color, 10%);
+  }
+  
+  &:disabled {
+    background-color: lighten($primary-color, 20%);
+    cursor: not-allowed;
+  }
+}
+
+.externalMealResults {
+  margin-top: 1rem;
+}
+
+// New recipe search styling
+.recipeSearchResults {
+  margin-top: 1rem;
+  width: 100%;
+}
+
+.recipeResultsHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  
+  h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: $text-white;
+    margin: 0;
+  }
+}
+
+.closeSearchButton {
+  background-color: transparent;
+  border: 1px solid $border-color;
+  color: $text-light;
+  border-radius: 4px;
+  padding: 0.3rem 0.8rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  
+  &:hover {
+    background-color: rgba($primary-color, 0.1);
+    border-color: $primary-color;
+    color: $primary-color;
+  }
+}
+
+.recipeGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 1rem;
+  width: 100%;
+}
+
+.recipeCard {
+  padding: 1rem;
+  border-radius: 8px;
+  background-color: $bg-lighter;
+  border: 1px solid $border-color;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    border-color: $primary-color;
+  }
+  
+  &.selectedRecipe {
+    border: 2px solid $primary-color;
+    background-color: rgba($primary-color, 0.05);
+  }
+}
+
+.recipeName {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  color: $text-primary;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-height: 2.5rem;
+}
+
+.recipeNutrition {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+}
+
+.nutrientItem {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.85rem;
+}
+
+.nutrientLabel {
+  color: $text-light;
+  font-weight: 400;
+}
+
+.nutrientValue {
+  color: $text-primary;
+  font-weight: 600;
+}
+
+.selectedExternalMeal {
+  margin-top: 1rem;
+  padding: 1rem;
+  border-radius: 4px;
+  background-color: $bg-lighter;
+  border: 1px solid $border-color;
+}
+
+.externalMealDetails {
+  h4 {
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+    color: $text-primary;
+  }
+  
+  p {
+    margin: 0.25rem 0;
+    color: $text-light;
+  }
+}
+
+.recipeLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: $primary-color;
+  margin-top: 0.75rem;
+  text-decoration: none;
+  font-weight: 500;
+  
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.saveSection {
+  margin-top: 2rem;
+  display: flex;
+  justify-content: center;
+}
+
+.saveButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 0.8rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.1s;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  
+  &:hover {
+    background-color: #43a047;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  }
+  
+  &:active {
+    transform: translateY(0);
+  }
+  
+  svg {
+    font-size: 1.2rem;
+  }
+}
+
 // Weekly plan section
 .weeklyPlanSection {
   background-color: $bg-light;
@@ -202,7 +456,7 @@
   display: block;
   font-weight: 500;
   margin-bottom: 0.25rem;
-  color: $text-white;
+  color: $text-primary;
 }
 
 .mealNutrition {
@@ -212,98 +466,57 @@
   color: $text-light;
 }
 
-.mealActions {
-  display: flex;
-  gap: 0.5rem;
-  margin-left: 0.5rem;
-}
-
-.editButton, .deleteButton {
-  width: 36px;
-  height: 36px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.removeMealButton {
+  background-color: transparent;
   border: none;
-  border-radius: 4px;
+  color: #999;
   cursor: pointer;
-  transition: all 0.2s;
-  font-size: 0.9rem;
-}
-
-.editButton {
-  background-color: #f5f7fa;
-  color: #000000;
-  border: 1px solid #000000;
-  
-  &:hover {
-    background-color: darken(#4a8eda, 10%);
-    color: #f5f7fa;
-    border: 1px solid #4a8eda;
-  }
-}
-
-.deleteButton {
-  background-color: #f5f7fa;
-  border: 1px solid #000000;
-  color: #000000;
-  
-  &:hover {
-    background-color: darken(#dc3545, 10%);
-    color: #f5f7fa;
-    border: 1px solid #dc3545;
-  }
-}
-
-.emptyMealSlot {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 1rem;
-  background-color: $bg-lighter;
+  padding: 5px;
   border-radius: 4px;
-  color: $text-light;
-  font-size: 0.9rem;
+  transition: all 0.2s;
   
-  .emptyIcon {
-    font-size: 1.5rem;
-    margin-bottom: 0.5rem;
-    opacity: 0.5;
+  &:hover {
+    color: #d9534f;
+    background-color: rgba(217, 83, 79, 0.1);
   }
 }
 
 .dailyTotals {
   padding: 1rem;
-  background-color: $bg-gray;
-  
-  h4 {
-    font-size: 1rem;
-    font-weight: 600;
-    margin-bottom: 0.75rem;
-    color: $text-white;
-  }
+  background-color: $bg-lighter;
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
 }
 
-.totalsGrid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
+.totalsHeader {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  color: $text-light;
+  border-bottom: 1px solid $border-color;
+  padding-bottom: 0.5rem;
+}
+
+.totalsList {
+  display: flex;
+  flex-direction: column;
   gap: 0.5rem;
 }
 
 .totalItem {
   display: flex;
-  flex-direction: column;
-}
-
-.totalLabel {
-  font-size: 0.85rem;
-  color: $text-light;
-}
-
-.totalValue {
-  font-weight: 600;
-  color: $text-white;
+  justify-content: space-between;
+  font-size: 0.9rem;
+  
+  span:first-child {
+    color: $text-light;
+    font-weight: 500;
+  }
+  
+  span:last-child {
+    color: $text-primary;
+    font-weight: 600;
+  }
 }
 
 // Action buttons
@@ -311,25 +524,6 @@
   display: flex;
   justify-content: center;
   margin-top: 2rem;
-}
-
-.saveButton {
-  background-color: $success-color;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  padding: 0.75rem 1.5rem;
-  font-size: 1rem;
-  font-weight: 500;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  transition: background-color 0.2s;
-  
-  &:hover {
-    background-color: darken($success-color, 10%);
-  }
 }
 
 // Add lazy loading spinner styles
@@ -409,4 +603,54 @@
   .dayColumn {
     min-width: 100%;
   }
+}
+
+.mealPlanningPage {
+  width: 100%;
+  padding: 1.5rem;
+  
+  @media (min-width: 1024px) {
+    padding: 2rem;
+  }
+}
+
+.pageHeader {
+  margin-bottom: 2rem;
+  
+  h1 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin: 0 0 0.5rem;
+    color: #333;
+  }
+  
+  p {
+    font-size: 1rem;
+    color: #666;
+    margin: 0;
+  }
+}
+
+.mealPlanningContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  
+  @media (min-width: 1024px) {
+    flex-direction: row;
+    gap: 2rem;
+  }
+}
+
+.sidePanel {
+  flex: 1;
+  
+  @media (min-width: 1024px) {
+    flex: 0 0 350px;
+    max-width: 350px;
+  }
+}
+
+.mainPanel {
+  flex: 2;
 } 

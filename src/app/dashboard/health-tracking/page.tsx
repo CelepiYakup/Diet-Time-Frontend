@@ -20,7 +20,7 @@ import LoadingIndicator from '@/app/components/LoadingIndicator';
 import { healthApi, BodyMeasurement, VitalSign, BloodWork, SleepPattern } from '@/app/services/api';
 import { toast } from 'react-hot-toast';
 
-// Register ChartJS components
+
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -31,46 +31,41 @@ ChartJS.register(
   Legend
 );
 
-// Helper function to format date strings
 const formatDate = (dateString: string) => {
   const date = new Date(dateString);
   return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
 };
 
-// Helper function to format date for input fields (YYYY-MM-DD)
 const formatDateForInput = (dateString: string) => {
   if (!dateString) return '';
   
   try {
-    // Directly return the date string if it's in YYYY-MM-DD format already
     if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
       return dateString;
     }
     
-    // Remove any timezone info to prevent date shifts
+
     let datePart = dateString;
     if (dateString.includes('T')) {
       datePart = dateString.split('T')[0];
     }
-    
-    // If it's a simple ISO date format (YYYY-MM-DD), return it directly
+
     if (/^\d{4}-\d{2}-\d{2}$/.test(datePart)) {
       return datePart;
     }
     
-    // Manual parsing without relying on Date object to avoid timezone issues
+
     if (datePart.includes('-')) {
       const [year, month, day] = datePart.split('-').map(Number);
       return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
     }
-    
-    // Last resort: use the Date object but be very careful with timezone
+
     const date = new Date(dateString);
     const year = date.getFullYear();
     const month = date.getMonth() + 1;
     const day = date.getDate();
     
-    // Log to check the parsed date
+
     console.log('Parsing date:', dateString, 'as:', `${year}-${month}-${day}`);
     
     return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
@@ -80,7 +75,7 @@ const formatDateForInput = (dateString: string) => {
   }
 };
 
-// Helper function to format date for API (YYYY-MM-DD)
+
 const formatDateForApi = (dateString: string) => {
   if (!dateString) return '';
   
@@ -89,8 +84,7 @@ const formatDateForApi = (dateString: string) => {
     if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
       return dateString;
     }
-    
-    // Parse the original parts to avoid timezone issues
+
     let parts: number[] = [];
     
     if (dateString.includes('T')) {
@@ -115,39 +109,38 @@ const formatDateForApi = (dateString: string) => {
   }
 };
 
-// Get today's date in YYYY-MM-DD format without timezone issues
 const getTodayDateString = () => {
   const today = new Date();
   return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
 };
 
-// Interface for form data
+
 type FormData = {
   date: string;
-  // Body measurements
+
   weight?: string;
   bmi?: string;
   bodyFat?: string;
   waist?: string;
-  // Vital signs
+
   heartRate?: string;
   bloodPressure?: string;
   temperature?: string;
   respiratoryRate?: string;
-  // Blood work
+
   glucose?: string;
   cholesterol?: string;
   hdl?: string;
   ldl?: string;
   triglycerides?: string;
-  // Sleep patterns
+
   duration?: string;
   quality?: string;
   deepSleep?: string;
   remSleep?: string;
 };
 
-// Function to sort records by date (newest first)
+
 const sortByDate = <T extends { date: string }>(records: T[]): T[] => {
   return [...records].sort((a, b) => {
     return new Date(b.date).getTime() - new Date(a.date).getTime();
@@ -174,7 +167,7 @@ export default function HealthTrackingDashboard() {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
-  // Fetch data from API
+
   useEffect(() => {
     const fetchData = async () => {
       if (!user) {
@@ -186,7 +179,7 @@ export default function HealthTrackingDashboard() {
         setLoading(true);
         const userId = user.id;
         
-        // Use healthApi to fetch data
+
         try {
           const bodyMeasurementsData = await healthApi.getBodyMeasurements(userId);
           setBodyMeasurements(sortByDate(bodyMeasurementsData));
@@ -224,7 +217,7 @@ export default function HealthTrackingDashboard() {
     fetchData();
   }, [user]);
 
-  // Event handlers
+
   const handleTabChange = (tab: string) => {
     setActiveTab(tab);
   };
@@ -258,28 +251,25 @@ export default function HealthTrackingDashboard() {
   const handleEditEntry = (type: string, entry: BodyMeasurement | VitalSign | BloodWork | SleepPattern) => {
     setActiveTab(type);
     
-    // Convert date to browser-compatible format (YYYY-MM-DD)
     const rawDate = entry.date;
     let formattedDate = '';
-    
-    // First try to split by T if present
+
     if (rawDate.includes('T')) {
       formattedDate = rawDate.split('T')[0];
     } else if (rawDate.includes('-') && rawDate.split('-').length === 3) {
-      // Already in YYYY-MM-DD format
+
       formattedDate = rawDate;
     } else {
-      // Fallback to a safer method
+
       try {
         const dateObj = new Date(rawDate);
         formattedDate = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
       } catch (e) {
         console.error('Could not parse date:', rawDate);
-        formattedDate = getTodayDateString(); // Default to today as a fallback
+        formattedDate = getTodayDateString(); 
       }
     }
     
-    console.log('Setting edit date to:', formattedDate, 'Original date:', rawDate);
     
     switch (type) {
       case 'bodyMeasurements': {
@@ -369,8 +359,7 @@ export default function HealthTrackingDashboard() {
     
     try {
       const userId = user.id;
-      
-      // Prepare data and submit based on active tab
+
       switch (activeTab) {
         case 'bodyMeasurements': {
           const data = {
@@ -384,7 +373,7 @@ export default function HealthTrackingDashboard() {
           
           if (editingEntryId) {
             const updatedRecord = await healthApi.updateBodyMeasurement(editingEntryId, data);
-            // Update local state to reflect changes immediately
+
             setBodyMeasurements(prevMeasurements => 
               sortByDate(prevMeasurements.map(item => 
                 item.id === editingEntryId ? updatedRecord : item
@@ -410,7 +399,7 @@ export default function HealthTrackingDashboard() {
           
           if (editingEntryId) {
             const updatedRecord = await healthApi.updateVitalSign(editingEntryId, data);
-            // Update local state to reflect changes immediately
+
             setVitalSigns(prevSigns => 
               sortByDate(prevSigns.map(item => 
                 item.id === editingEntryId ? updatedRecord : item
@@ -437,7 +426,7 @@ export default function HealthTrackingDashboard() {
           
           if (editingEntryId) {
             const updatedRecord = await healthApi.updateBloodWork(editingEntryId, data);
-            // Update local state to reflect changes immediately
+
             setBloodWork(prevWork => 
               sortByDate(prevWork.map(item => 
                 item.id === editingEntryId ? updatedRecord : item
@@ -463,7 +452,7 @@ export default function HealthTrackingDashboard() {
           
           if (editingEntryId) {
             const updatedRecord = await healthApi.updateSleepPattern(editingEntryId, data);
-            // Update local state to reflect changes immediately
+
             setSleepPatterns(prevPatterns => 
               sortByDate(prevPatterns.map(item => 
                 item.id === editingEntryId ? updatedRecord : item
@@ -479,7 +468,7 @@ export default function HealthTrackingDashboard() {
         }
       }
       
-      // Reset form
+
       setFormData({ date: getTodayDateString() });
       setEditingEntryId(null);
       setShowForm(false);
@@ -491,12 +480,12 @@ export default function HealthTrackingDashboard() {
   };
 
   const renderBodyMeasurements = () => {
-    // Weight trend chart data
+
     const chartData = {
       labels: bodyMeasurements.map(entry => formatDate(entry.date)).reverse(),
       datasets: [
         {
-          label: 'Weight (lbs)',
+          label: 'Weight (kg)',
           data: bodyMeasurements.map(entry => parseFloat(entry.weight || '0')).reverse(),
           fill: false,
           backgroundColor: 'rgba(75, 192, 192, 0.2)',
@@ -522,7 +511,7 @@ export default function HealthTrackingDashboard() {
           beginAtZero: false,
           title: {
             display: true,
-            text: 'Weight (lbs)'
+            text: 'Weight (kg)'
           }
         },
         x: {
@@ -548,7 +537,7 @@ export default function HealthTrackingDashboard() {
             <thead>
               <tr>
                 <th>Date</th>
-                <th>Weight (lbs)</th>
+                <th>Weight (kg)</th>
                 <th>BMI</th>
                 <th>Body Fat %</th>
                 <th>Waist (in)</th>

@@ -102,14 +102,14 @@ export default function MealPlanningFeature() {
         <section className={styles.featureDescription}>
           <h2 className={styles.sectionTitle}>Plan Your Way to Better Nutrition</h2>
           <p className={styles.paragraph}>
-            Diet Time&apos;s Meal Planning feature empowers you to take control of your nutrition through thoughtful, 
-            organized meal preparation. Whether you&apos;re trying to lose weight, build muscle, or simply eat healthier, 
+            Diet Time's Meal Planning feature empowers you to take control of your nutrition through thoughtful, 
+            organized meal preparation. Whether you're trying to lose weight, build muscle, or simply eat healthier, 
             planning your meals in advance is one of the most effective strategies for success.
           </p>
           <p className={styles.paragraph}>
             Our intuitive tools make it easy to create balanced meal plans that align with your dietary goals and 
             preferences. From generating shopping lists to suggesting recipes based on your nutritional needs, 
-            we&apos;ve designed every aspect of our meal planning system to save you time and help you make healthier choices.
+            we've designed every aspect of our meal planning system to save you time and help you make healthier choices.
           </p>
         </section>
 

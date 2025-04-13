@@ -22,11 +22,10 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
   variant = 'success',
   isPulsing = false,
 }) => {
-  // Fix for current value greater than max value
+
   const effectiveCurrentValue = Math.min(currentValue, maxValue);
   const percentage = Math.min(100, (effectiveCurrentValue / maxValue) * 100);
-  
-  // Determine variant class based on percentage if not specified
+
   const determineVariant = () => {
     if (variant) return variant;
     if (percentage < 40) return 'danger';

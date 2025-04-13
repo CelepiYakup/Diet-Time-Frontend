@@ -26,7 +26,7 @@ export default function Dashboard() {
   const [goalsError, setGoalsError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Redirect if not authenticated
+
     if (!isAuthenticated) {
       router.push('/login');
       return;
@@ -47,10 +47,9 @@ export default function Dashboard() {
           return mealDate === today;
         });
         
-        // Set today's meals for display
+
         setMeals(todayMeals);
-        
-        // Calculate totals for today's meals
+
         const calories = todayMeals.reduce((sum, meal) => sum + meal.calories, 0);
         const protein = todayMeals.reduce((sum, meal) => sum + meal.protein, 0);
         const carbs = todayMeals.reduce((sum, meal) => sum + meal.carbs, 0);
@@ -89,13 +88,13 @@ export default function Dashboard() {
 
   const handleDeleteMeal = async (mealId: number) => {
     try {
-      // Check if meal exists in any meal plans
+
       if (!user) return;
       
       const mealPlans = await mealPlanApi.getUserMealPlans(user.id);
       const mealPlanReferences = mealPlans.filter(plan => plan.meal_id === mealId);
       
-      // If the meal is referenced in meal plans, ask for confirmation
+
       if (mealPlanReferences.length > 0) {
         const confirmDelete = window.confirm(
           `This meal is being used in ${mealPlanReferences.length} meal plan(s). Deleting it will also remove it from your meal plans. Continue?`
@@ -103,20 +102,18 @@ export default function Dashboard() {
         
         if (!confirmDelete) return;
         
-        // Delete all meal plan references
+    
         for (const plan of mealPlanReferences) {
           await mealPlanApi.deleteMealPlan(plan.id);
         }
       }
       
-      // Now delete the meal
       await mealApi.deleteMeal(mealId);
       
-      // Update meals list
+
       setMeals(prevMeals => {
         const updatedMeals = prevMeals.filter(meal => meal.id !== mealId);
-        
-        // Recalculate totals
+
         const calories = updatedMeals.reduce((sum, meal) => sum + meal.calories, 0);
         const protein = updatedMeals.reduce((sum, meal) => sum + meal.protein, 0);
         const carbs = updatedMeals.reduce((sum, meal) => sum + meal.carbs, 0);
@@ -135,7 +132,6 @@ export default function Dashboard() {
     }
   };
 
-  // Format date for display in UTC
   const formatDateInUTC = () => {
     const now = new Date();
     return now.toLocaleDateString('en-US', { 
@@ -147,7 +143,7 @@ export default function Dashboard() {
   };
 
   if (!isAuthenticated) {
-    return null; // Don't render anything while redirecting
+    return null; 
   }
 
   return (
@@ -250,14 +246,13 @@ export default function Dashboard() {
           </div>
         ) : (
           <div className={styles.emptyState}>
-            <p>You haven&apos;t set any goals yet.</p>
+            <p>You haven't set any goals yet.</p>
             <Link href="/dashboard/goals" className="btn btn-primary">
               Set Your First Goal
             </Link>
           </div>
         )}
       </section>
-      {/* More sections and recommendations */}
       <section className={styles.moreFeaturesSection}>
         <LearnMore 
           title="Discover More Diet Time Features"

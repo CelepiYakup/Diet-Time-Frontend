@@ -53,7 +53,7 @@ export default function MealPlansFeature() {
             Diet Time equips you with highly personalized meal plans that cater to your unique dietary requirements and preferences. Through our intuitive interface, you can customize meal plans to address specific health goals, dietary restrictions, and nutritional needs.
           </p>
           <p className={styles.paragraph}>
-            Whether you&apos;re looking to lose weight, gain muscle, manage a health condition, or simply eat healthier, our personalized meal planning system adapts to your specific situation. No more generic meal plans that don&apos;t fit your lifestyle or preferences.
+            Whether you're looking to lose weight, gain muscle, manage a health condition, or simply eat healthier, our personalized meal planning system adapts to your specific situation. No more generic meal plans that don't fit your lifestyle or preferences.
           </p>
         </div>
 

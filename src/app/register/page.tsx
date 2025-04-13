@@ -30,20 +30,19 @@ export default function Register() {
     setIsLoading(true);
 
     try {
-      // Validate form
+
       if (!formData.username || !formData.email || !formData.password) {
         showError('All fields are required');
         setIsLoading(false);
         return;
       }
 
-      // Register user
+
       await userApi.registerUser(formData);
       
-      // Show success message
+
       showSuccess('Account created successfully! Please log in.');
-      
-      // Redirect to login page
+
       router.push('/login');
     } catch (error) {
       if (error instanceof Error) {
@@ -61,9 +60,6 @@ export default function Register() {
       <div className={styles.registerContainer}>
         <div className={styles.registerCard}>
           <div className={styles.logoContainer}>
-            <div className={styles.logo}>
-              <span className={styles.logoText}>Diet Time</span>
-            </div>
           </div>
           
           <h1 className={styles.title}>Create Account</h1>

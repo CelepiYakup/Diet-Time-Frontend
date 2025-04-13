@@ -36,19 +36,20 @@ export function useApi<T>(): ApiResponse<T> {
         setLoading(true);
         setError(null);
 
-        // Add auth token if required
+
         if (requiresAuth) {
           const token = getAuthToken();
           if (!token) {
-            // Redirect to login if no token and authentication is required
+
             toast.error('Please log in to continue');
+            localStorage.removeItem('user');
             router.push('/login');
             throw new Error('Authentication required');
           }
           headers.Authorization = `Bearer ${token}`;
         }
 
-        // Prepare fetch options
+
         const fetchOptions: RequestInit = {
           method,
           headers: {
@@ -64,22 +65,34 @@ export function useApi<T>(): ApiResponse<T> {
 
         const response = await fetch(url, fetchOptions);
 
-        // Handle unauthorized
+
         if (response.status === 401) {
-          // Clear localStorage and redirect to login
+
           localStorage.removeItem('user');
-          toast.error('Your session has expired. Please log in again.');
+          toast.error('Your session has expired. Please log in again.', {
+            duration: 4000,
+            position: 'top-center',
+            style: {
+              background: '#FF5252',
+              color: '#fff',
+              padding: '16px',
+              borderRadius: '8px',
+            },
+            iconTheme: {
+              primary: '#fff',
+              secondary: '#FF5252',
+            },
+          });
           router.push('/login');
-          throw new Error('Unauthorized');
+          throw new Error('Unauthorized: Token has expired');
         }
 
-        // Handle other errors
         if (!response.ok) {
           const errorData = await response.json();
           throw new Error(errorData.message || 'An error occurred');
         }
 
-        // Parse and return data
+    
         const responseData = await response.json();
         setData(responseData);
         return responseData;

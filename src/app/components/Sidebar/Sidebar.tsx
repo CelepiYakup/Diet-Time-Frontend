@@ -30,7 +30,7 @@ const Sidebar = ({ isOpen, isCollapsed, onClose }: SidebarProps) => {
   const pathname = usePathname();
   const sidebarRef = useRef<HTMLDivElement>(null);
 
-  // Close sidebar when clicking outside
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (isOpen && !isCollapsed && sidebarRef.current && !sidebarRef.current.contains(event.target as Node)) {
@@ -44,7 +44,7 @@ const Sidebar = ({ isOpen, isCollapsed, onClose }: SidebarProps) => {
     };
   }, [isOpen, onClose, isCollapsed]);
 
-  // Prevent scrolling when sidebar is open
+
   useEffect(() => {
     if (isOpen && !isCollapsed) {
       document.body.style.overflow = 'hidden';
@@ -57,7 +57,7 @@ const Sidebar = ({ isOpen, isCollapsed, onClose }: SidebarProps) => {
     };
   }, [isOpen, isCollapsed]);
 
-  // Handle sidebar open/close/collapse states
+
   const getSidebarClassName = () => {
     if (!isOpen) {
       return styles.sidebar;

@@ -4,7 +4,6 @@ import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { toast } from 'react-hot-toast';
 import styles from './login.module.scss';
 
 export default function LoginPage() {
@@ -14,7 +13,7 @@ export default function LoginPage() {
   const { login, isLoading, isAuthenticated } = useAuth();
   const router = useRouter();
 
-  // Redirect if already authenticated
+
   React.useEffect(() => {
     if (isAuthenticated) {
       router.push('/dashboard');
@@ -25,7 +24,7 @@ export default function LoginPage() {
     e.preventDefault();
     setFormError('');
 
-    // Validate form
+
     if (!email || !password) {
       setFormError('Email and password are required');
       return;
@@ -33,7 +32,7 @@ export default function LoginPage() {
 
     try {
       await login({ email, password });
-      // Auth context will handle success and redirection
+
     } catch (error) {
       console.error('Login error:', error);
       setFormError('Invalid email or password');

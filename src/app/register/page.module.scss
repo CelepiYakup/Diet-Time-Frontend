@@ -1,9 +1,11 @@
+@import '../styles/variables.scss';
+
 .registerPage {
   min-height: calc(100vh - 60px);
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #f9fafb;
+  background-color: $bg-darker;
 }
 
 .registerContainer {
@@ -25,28 +27,12 @@
   margin-bottom: 1.5rem;
 }
 
-.logo {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 60px;
-  height: 60px;
-  border-radius: 12px;
-  background: linear-gradient(135deg, var(--primary-color), #4a8eda);
-}
-
-.logoText {
-  font-weight: 700;
-  color: white;
-  font-size: 0.75rem;
-}
-
 .title {
   font-size: 1.75rem;
   font-weight: 700;
   text-align: center;
   margin-bottom: 0.5rem;
-  color: #1f2937;
+  color: $primary-color;
 }
 
 .subtitle {
@@ -103,7 +89,7 @@
 }
 
 .submitButton {
-  background-color: var(--primary-color);
+  background-color: $primary-color;
   color: white;
   border: none;
   border-radius: 8px;

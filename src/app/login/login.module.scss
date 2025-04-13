@@ -21,7 +21,7 @@
 .title {
   font-size: 1.8rem;
   font-weight: 700;
-  color: $text-white;
+  color: $primary-color;
   margin-bottom: 1.5rem;
   text-align: center;
 }
@@ -60,7 +60,7 @@
   border: 1px solid $border-color;
   border-radius: 4px;
   background-color: $bg-lighter;
-  color: $text-white;
+  color: $text-primary;
   font-size: 1rem;
   
   &::placeholder {

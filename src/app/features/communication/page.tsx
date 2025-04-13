@@ -53,7 +53,7 @@ export default function CommunicationFeature() {
             Diet Time integrates robust communication features that enable you to maintain seamless contact with nutrition professionals. Through secure messaging and video conferencing, you can receive guidance, answers to your questions, and ongoing support throughout your wellness journey.
           </p>
           <p className={styles.paragraph}>
-            Effective communication is key to successful nutrition counseling. Our platform ensures that you&apos;re never alone in your health journey, with multiple ways to connect with your dietitian or nutritionist whenever you need support or have questions.
+            Effective communication is key to successful nutrition counseling. Our platform ensures that you're never alone in your health journey, with multiple ways to connect with your dietitian or nutritionist whenever you need support or have questions.
           </p>
         </div>
 
@@ -87,7 +87,7 @@ export default function CommunicationFeature() {
           <div className={styles.testimonial}>
             <div className={styles.testimonialContent}>
               <p className={styles.testimonialText}>
-                &quot;Being able to message my dietitian whenever I have questions has been a game-changer. I get quick responses and don&apos;t have to wait for my next appointment to make adjustments to my meal plan.&quot;
+                "Being able to message my dietitian whenever I have questions has been a game-changer. I get quick responses and don't have to wait for my next appointment to make adjustments to my meal plan."
               </p>
               <div className={styles.testimonialAuthor}>
                 <div className={styles.testimonialAvatar}></div>

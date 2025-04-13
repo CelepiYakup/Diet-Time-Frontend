@@ -83,12 +83,12 @@ export default function ProgressTrackingFeature() {
         <section className={styles.featureDescription}>
           <h2 className={styles.sectionTitle}>Track Your Journey to Better Health</h2>
           <p className={styles.paragraph}>
-            Diet Time&apos;s Progress Tracking feature provides powerful tools to monitor and visualize your health and 
+            Diet Time's Progress Tracking feature provides powerful tools to monitor and visualize your health and 
             nutrition journey. By tracking key metrics over time, you can see tangible evidence of your progress, 
-            identify what&apos;s working, and make informed adjustments to your approach.
+            identify what's working, and make informed adjustments to your approach.
           </p>
           <p className={styles.paragraph}>
-            Whether you&apos;re focused on weight management, improving body composition, or enhancing overall health, 
+            Whether you're focused on weight management, improving body composition, or enhancing overall health, 
             our tracking tools give you the insights you need to stay motivated and achieve your goals.
           </p>
         </section>

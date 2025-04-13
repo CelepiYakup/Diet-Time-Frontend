@@ -33,7 +33,7 @@ export default function ProgressMonitoringFeature() {
     },
     {
       name: 'Nutrient Analysis',
-      description: 'Ensure you&apos;re getting essential vitamins and minerals'
+      description: 'Ensure you are getting essential vitamins and minerals'
     },
     {
       name: 'Hydration Levels',
@@ -57,7 +57,7 @@ export default function ProgressMonitoringFeature() {
             Diet Time offers real-time tracking capabilities, allowing you to monitor your dietary progress with precision. Our platform provides insightful data visualization tools to track changes in weight, dietary habits, and health indicators over time, facilitating data-driven decision-making for better health outcomes.
           </p>
           <p className={styles.paragraph}>
-            Understanding your nutrition patterns is key to making sustainable changes. Our progress monitoring tools help you identify what&apos;s working and what needs adjustment, so you can continuously optimize your diet for your health goals.
+            Understanding your nutrition patterns is key to making sustainable changes. Our progress monitoring tools help you identify what's working and what needs adjustment, so you can continuously optimize your diet for your health goals.
           </p>
         </div>
 

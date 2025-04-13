@@ -35,3 +35,19 @@ The easiest way to deploy your Next.js app is to use the [Vercel Platform](https
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
 # dietfront
+
+## Docker ile çalıştırma
+
+1. `.env.example` dosyasını `.env.local` olarak kopyalayın ve gerekli değişiklikleri yapın:
+   ```
+   cp .env.example .env.local
+   ```
+
+2. Docker Compose ile uygulamayı başlatın:
+   ```
+   docker-compose up -d
+   ```
+
+3. Frontend uygulaması http://localhost:3000 adresinde çalışacaktır.
+
+Not: Backend ve veritabanı ayrı bir repoda olduğu için, frontend uygulamasını çalıştırmadan önce backend'in çalıştığından emin olun.
