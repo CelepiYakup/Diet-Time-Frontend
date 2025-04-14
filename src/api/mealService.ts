@@ -1,14 +1,17 @@
 import axios from 'axios';
 import { Meal, MealPlan } from '@/app/types/meals';
+import { getAuthToken } from '@/app/context/AuthContext';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
-const SPOONACULAR_API_KEY = process.env.REACT_APP_SPOONACULAR_API_KEY || '4916fa32f6da422984ac96c6c522c8fd';
+const SPOONACULAR_API_KEY = process.env.REACT_APP_SPOONACULAR_API_KEY;
 
-// Meal API for internal meals
 export const mealApi = {
   getUserMeals: async (userId: string): Promise<Meal[]> => {
     try {
-      const response = await axios.get(`${API_URL}/meals/user/${userId}`);
+      const token = getAuthToken();
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+      
+      const response = await axios.get(`${API_URL}/meals/user/${userId}`, { headers });
       return response.data;
     } catch (error) {
       console.error('Error fetching user meals:', error);
@@ -18,7 +21,10 @@ export const mealApi = {
 
   createMeal: async (meal: Omit<Meal, 'id'>, userId: string): Promise<Meal> => {
     try {
-      const response = await axios.post(`${API_URL}/meals`, { ...meal, userId });
+      const token = getAuthToken();
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+      
+      const response = await axios.post(`${API_URL}/meals`, { ...meal, userId }, { headers });
       return response.data;
     } catch (error) {
       console.error('Error creating meal:', error);
@@ -28,7 +34,10 @@ export const mealApi = {
 
   updateMeal: async (mealId: string, meal: Partial<Meal>): Promise<Meal> => {
     try {
-      const response = await axios.put(`${API_URL}/meals/${mealId}`, meal);
+      const token = getAuthToken();
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+      
+      const response = await axios.put(`${API_URL}/meals/${mealId}`, meal, { headers });
       return response.data;
     } catch (error) {
       console.error('Error updating meal:', error);
@@ -38,7 +47,10 @@ export const mealApi = {
 
   deleteMeal: async (mealId: string): Promise<void> => {
     try {
-      await axios.delete(`${API_URL}/meals/${mealId}`);
+      const token = getAuthToken();
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+      
+      await axios.delete(`${API_URL}/meals/${mealId}`, { headers });
     } catch (error) {
       console.error('Error deleting meal:', error);
       throw error;
@@ -46,11 +58,13 @@ export const mealApi = {
   }
 };
 
-// Meal Plan API for saving meal plans
 export const mealPlanApi = {
   getUserMealPlans: async (userId: string): Promise<MealPlan[]> => {
     try {
-      const response = await axios.get(`${API_URL}/meal-plans/user/${userId}`);
+      const token = getAuthToken();
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+      
+      const response = await axios.get(`${API_URL}/meal-plans/user/${userId}`, { headers });
       return response.data;
     } catch (error) {
       console.error('Error fetching user meal plans:', error);
@@ -60,7 +74,10 @@ export const mealPlanApi = {
 
   saveMealPlan: async (userId: string, mealPlans: Omit<MealPlan, 'id'>[]): Promise<MealPlan[]> => {
     try {
-      const response = await axios.post(`${API_URL}/meal-plans/batch`, { userId, mealPlans });
+      const token = getAuthToken();
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+      
+      const response = await axios.post(`${API_URL}/meal-plans/batch`, { userId, mealPlans }, { headers });
       return response.data;
     } catch (error) {
       console.error('Error saving meal plan:', error);
@@ -69,7 +86,6 @@ export const mealPlanApi = {
   }
 };
 
-// External Meal API for Spoonacular integration
 export const externalMealApi = {
   searchMeals: async ({ query, mealType }: { query: string, mealType?: string }): Promise<any[]> => {
     try {
@@ -78,9 +94,8 @@ export const externalMealApi = {
         return mockSearchResults;
       }
 
-      // Prepare parameters for Spoonacular API
       const params = new URLSearchParams({
-        apiKey: SPOONACULAR_API_KEY,
+        apiKey: SPOONACULAR_API_KEY || '',
         query,
         number: '5',
       });
@@ -90,8 +105,7 @@ export const externalMealApi = {
       }
 
       const response = await axios.get(`https://api.spoonacular.com/recipes/complexSearch?${params.toString()}`);
-      
-      // Get nutrition information for each recipe
+
       const recipes = response.data.results;
       const detailedRecipes = await Promise.all(
         recipes.map(async (recipe: any) => {
@@ -107,7 +121,7 @@ export const externalMealApi = {
               protein: parseInt(nutritionResponse.data.protein, 10),
               carbs: parseInt(nutritionResponse.data.carbs, 10),
               fat: parseInt(nutritionResponse.data.fat, 10),
-              image: recipe.image
+
             };
           } catch (error) {
             console.error(`Error fetching nutrition for recipe ${recipe.id}:`, error);
@@ -118,7 +132,7 @@ export const externalMealApi = {
               protein: 0,
               carbs: 0,
               fat: 0,
-              image: recipe.image
+
             };
           }
         })
@@ -127,12 +141,11 @@ export const externalMealApi = {
       return detailedRecipes;
     } catch (error) {
       console.error('Error searching for external meals:', error);
-      return mockSearchResults; // Fallback to mock data
+      return mockSearchResults;
     }
   }
 };
 
-// Mock search results for development
 const mockSearchResults = [
   {
     id: 'spoon-1',
@@ -141,7 +154,7 @@ const mockSearchResults = [
     protein: 30,
     carbs: 15,
     fat: 10,
-    image: 'https://spoonacular.com/recipeImages/grilled-chicken-salad.jpg'
+    
   },
   {
     id: 'spoon-2',
@@ -150,7 +163,7 @@ const mockSearchResults = [
     protein: 12,
     carbs: 30,
     fat: 8,
-    image: 'https://spoonacular.com/recipeImages/vegetable-stir-fry.jpg'
+
   },
   {
     id: 'spoon-3',
@@ -159,6 +172,5 @@ const mockSearchResults = [
     protein: 35,
     carbs: 20,
     fat: 15,
-    image: 'https://spoonacular.com/recipeImages/salmon-vegetables.jpg'
   }
 ]; 
