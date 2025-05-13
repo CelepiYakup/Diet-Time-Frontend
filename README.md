@@ -83,6 +83,7 @@ You can also run the application using Docker:
 
 2. Build and start the container:
    ```
+   docker-compose up --build
    docker-compose up -d
    ```
 
