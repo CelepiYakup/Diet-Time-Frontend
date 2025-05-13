@@ -3,7 +3,7 @@ import { Meal, MealPlan } from '@/app/types/meals';
 import { getAuthToken } from '@/app/context/AuthContext';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
-const SPOONACULAR_API_KEY = process.env.REACT_APP_SPOONACULAR_API_KEY;
+const SPOONACULAR_API_KEY = process.env.NEXT_PUBLIC_SPOONACULAR_API_KEY ;
 
 export const mealApi = {
   getUserMeals: async (userId: string): Promise<Meal[]> => {
@@ -90,7 +90,7 @@ export const externalMealApi = {
   searchMeals: async ({ query, mealType }: { query: string, mealType?: string }): Promise<any[]> => {
     try {
       // Mock response for development
-      if (process.env.NODE_ENV === 'development' && (!SPOONACULAR_API_KEY || SPOONACULAR_API_KEY === '4916fa32f6da422984ac96c6c522c8fd')) {
+      if (process.env.NODE_ENV === 'development' && (!SPOONACULAR_API_KEY)) {
         return mockSearchResults;
       }
 
