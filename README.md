@@ -116,4 +116,3 @@ To learn more about Next.js, take a look at the following resources:
 
 The application can be deployed to Vercel or any other hosting platform that supports Next.js.
 
-

@@ -1,57 +1,43 @@
-'use client';
+"use client";
 
-import { useState, FormEvent } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import styles from './page.module.scss';
-import { userApi, UserInput } from '../services/api';
-import { useToast } from '../context/ToastContext';
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import styles from "./page.module.scss";
+import { userApi } from "../services/api";
+import { useToast } from "../context/ToastContext";
+import {
+  registerSchema,
+  RegisterInput,
+} from "../lib/validation/register/register.schema";
+import Input from "../ui/input/input";
 
 export default function Register() {
   const router = useRouter();
   const { showSuccess, showError } = useToast();
-  const [formData, setFormData] = useState<UserInput>({
-    username: '',
-    email: '',
-    password: '',
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+    trigger,
+  } = useForm<RegisterInput>({
+    resolver: zodResolver(registerSchema),
+    mode: "onSubmit",
   });
-  const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-
+  const onSubmit = async (data: RegisterInput) => {
     try {
-
-      if (!formData.username || !formData.email || !formData.password) {
-        showError('All fields are required');
-        setIsLoading(false);
-        return;
-      }
-
-
-      await userApi.registerUser(formData);
-      
-
-      showSuccess('Account created successfully! Please log in.');
-
-      router.push('/login');
+      await userApi.registerUser(data);
+      showSuccess("Account created successfully! Please log in.");
+      router.push("/login");
     } catch (error) {
       if (error instanceof Error) {
         showError(error.message);
       } else {
-        showError('An unexpected error occurred');
+        showError("An unexpected error occurred");
       }
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -59,86 +45,67 @@ export default function Register() {
     <div className={styles.registerPage}>
       <div className={styles.registerContainer}>
         <div className={styles.registerCard}>
-          <div className={styles.logoContainer}>
-          </div>
-          
           <h1 className={styles.title}>Create Account</h1>
-          <p className={styles.subtitle}>Join Diet Time to track your nutrition</p>
-          
-          <form className={styles.form} onSubmit={handleSubmit}>
+          <p className={styles.subtitle}>
+            Join Diet Time to track your nutrition
+          </p>
+
+          <form className={styles.form} onSubmit={handleSubmit(onSubmit)}>
             <div className={styles.formGroup}>
               <label htmlFor="username" className={styles.label}>
                 Username
               </label>
-              <div className={styles.inputWrapper}>
-                <input
-                  type="text"
-                  id="username"
-                  name="username"
-                  className={styles.input}
-                  value={formData.username}
-                  onChange={handleChange}
-                  placeholder="Choose a username"
-                  required
-                />
-              </div>
+              <Input
+                name="username"
+                type="username"
+                placeholder="Choose a username"
+                register={register}
+                error={errors.username}
+              />
             </div>
-            
+
             <div className={styles.formGroup}>
               <label htmlFor="email" className={styles.label}>
                 Email
               </label>
-              <div className={styles.inputWrapper}>
-                <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  className={styles.input}
-                  value={formData.email}
-                  onChange={handleChange}
-                  placeholder="Enter your email"
-                  required
-                />
-              </div>
+              <Input
+                name="email"
+                type="email"
+                placeholder="Enter your email"
+                register={register}
+                error={errors.email}
+              />
             </div>
-            
+
             <div className={styles.formGroup}>
               <label htmlFor="password" className={styles.label}>
                 Password
               </label>
-              <div className={styles.inputWrapper}>
-                <input
-                  type="password"
-                  id="password"
-                  name="password"
-                  className={styles.input}
-                  value={formData.password}
-                  onChange={handleChange}
-                  placeholder="Create a password"
-                  required
-                />
-              </div>
-              <p className={styles.passwordHint}>
-                Password should be at least 8 characters
-              </p>
+              <Input
+                name="password"
+                type="password"
+                placeholder="Enter your password"
+                register={register}
+                error={errors.password}
+              />
             </div>
-            
+
             <button
               type="submit"
               className={styles.submitButton}
-              disabled={isLoading}
+              disabled={isSubmitting}
             >
-              {isLoading ? (
+              {isSubmitting ? (
                 <span className={styles.loadingSpinner}></span>
               ) : (
-                'Create Account'
+                "Create Account"
               )}
             </button>
           </form>
-          
+
           <div className={styles.footer}>
             <p>
-              Already have an account?{' '}
+              Already have an account?{" "}
               <Link href="/login" className={styles.link}>
                 Sign In
               </Link>
@@ -148,4 +115,4 @@ export default function Register() {
       </div>
     </div>
   );
-} 
+}
