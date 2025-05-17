@@ -57,6 +57,7 @@ export default function Register() {
               </label>
               <Input
                 name="username"
+                label="Username"
                 type="username"
                 placeholder="Choose a username"
                 register={register}
@@ -88,6 +89,7 @@ export default function Register() {
                 register={register}
                 error={errors.password}
               />
+
             </div>
 
             <button
